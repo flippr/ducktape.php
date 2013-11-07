@@ -1,7 +1,11 @@
 <?php
 /**
 	This is the primary include file for the OSProvider library.
+
+	The default directory for settings is 'ducktape/../local'. The idea behind this location is to keep the local settings outside of the source repository (without relying on .gitignore).
 */
+
+$local_dir = dirname(__FILE__)."/../local"; //local server settings
 
 //check for cgi access and populate $_REQUEST
 if(isset($argc)){
@@ -22,6 +26,7 @@ include_once(dirname(__FILE__)."/modules/providers/DTSecureProvider.class.php");
 
 include_once(dirname(__FILE__)."/modules/consumers/DTConsumer.class.php");
 
+include_once 'PHPUnit/Autoload.php';
 include_once(dirname(__FILE__)."/tests/DTTestCase.class.php");
 
 include_once(dirname(__FILE__)."/modules/models/DTModel.class.php");
