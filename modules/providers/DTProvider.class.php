@@ -15,29 +15,29 @@ class DTProvider{
  *  Methods for parsing parameters into distinct types
  */
 ///@{
+	public function param($name){
+		if(!isset($this->params[$name]))
+			DTLog::warn("Attempt to access invalid parameter ({$name}). ".json_encode($this->params),1);
+		return $this->params[$name];
+	}
+
 	public function jsonParam($name){
-		return json_decode($this->params[$name],true);
+		return json_decode($this->param($name),true);
 	}
 	
 	public function intParam($name){
-		return intval($this->params[$name]);
+		return intval($this->param($name));
 	}
 	
 	public function boolParam($name){
-		return ($this->params[$name]==true);
+		return ($this->param($name)==true);
 	}
 	
 	/**
-		returns a string param, cleaning it if +db+ is valid
+		@return returns a string param, cleaning it if +db+ is valid
 	*/
 	public function stringParam($name){
-		if(!isset($this->params[$name])){
-			DTLog::warn("Attempt to access invalid parameter ({$name}). ".json_encode($this->params),1);
-		}
-		$val = $this->params[$name];
-		if($this->db!=null)
-			$val = $this->db->clean($val);
-		return $val;
+		return isset($this->db)?$this->db->clean($this->param($name)):$this->param($name);
 	}
 	
 //==================
