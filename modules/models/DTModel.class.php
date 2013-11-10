@@ -43,18 +43,24 @@ class DTModel implements arrayaccess {
     
     /**
     	looks for an accessor method (called set+offset+), or uses a basic storage mechanism
+    	@return returns the value that was stored
     */
     public function offsetSet($offset, $value) {
     	if (is_null($offset)) {
             $this->_properties[] = $value;
+            return $value;
         } else {
 	    	$accessor = "set".preg_replace('/[^A-Z^a-z^0-9]+/','',$offset);
 			if(!$this->_bypass_accessors && method_exists($this, $accessor)) //use the accessor method
-				$this->$accessor($value);
-			else if(property_exists($this, $offset)) //use the property
+				return $this->$accessor($value);
+			else if(property_exists($this, $offset)){ //use the property
 				$this->$offset = $value;
-			else if(static::$strict_properties==false) // set object property
+				return $value;
+			}
+			else if(static::$strict_properties==false){ // set object property
 				$this->_properties[$offset] = $value;
+				return $value;
+			}
 			/*else //it is not an error to fail to set a property
 				DTLog::debug("failed to set property ({$offset})");*/
         }

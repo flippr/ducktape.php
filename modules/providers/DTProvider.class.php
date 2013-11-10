@@ -58,21 +58,12 @@ class DTProvider{
 	}
 
 	/**
-	establishes a PHP session
-	@remark overriding subclasses should call this method
-	*/
-	protected function startSession(){
-		session_start();
-	}
-
-	/**
 	performs an action by name
 	@param action - the action to perform (uses 'act' param key, if null)
 	@note if action is the name of a method, the appropriate method is called
 	*/
 	public function performAction($action=null){
 		$action = (isset($action)?$action:$this->stringParam("act"));
-		$this->startSession(); //must go here for oauth token population
 		try{
 			$meth = new ReflectionMethod($this,$action);
 			if(method_exists($this, $action) && $meth->isPublic()){

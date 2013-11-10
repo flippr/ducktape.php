@@ -28,6 +28,14 @@ abstract class DTDatabase {
 	abstract public function clean($param);
 	/** @return returns an array with the results of a query */
 	abstract public function select($query);
+	/** @return returns an array of objects of type +class_name+ */
+	public function selectAs($query,$class_name){
+		$list = array();
+		$rows = $this->function($query);
+		foreach($rows as $r)
+			$list[] = new $class_name($r);
+		return $list;
+	}
 	/** excecutes a statement without retrieving the result */
 	abstract public function query($query);
 	/** @return returns a prepared statement */
