@@ -3,9 +3,11 @@ require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTProvider{
 	public $params = null;
+	protected $response = null;
 	
 	function __construct($db=null){
 		$this->db = isset($db)?$db:DTSettings::$default_database;
+		$this->response = new DTResponse();
 	}
 	
 //===================
@@ -33,6 +35,16 @@ class DTProvider{
 		return ($this->param($name)==true);
 	}
 	
+	public function arrayParam($name){
+		$arr = $this->param($name);
+		if(!is_array($arr)) //if this isn't array, assume it is json encoded
+			$arr = json_decode($arr);
+		if(isset($this->db))
+			foreach($arr as $k=>$v) //clean all the array params
+				$arr[$k] = $this->db->clean($v);
+		return $arr;
+	}
+	
 	/**
 		@return returns a string param, cleaning it if +db+ is valid
 	*/
@@ -51,9 +63,12 @@ class DTProvider{
 		A convenience method for handling a standard request and sending a response
 	*/
 	public function handleRequest(){
-		$action = $this->stringParam("act");
+		$action = "action".preg_replace('/[^A-Z^a-z^0-9]+/','',$this->stringParam("act"));
 		$this->performAction($action);
-		$this->sendResponse($this->stringParam("fmt"));
+		switch($this->stringParam("fmt")){
+			default:
+				$this->response->renderAsJSON();
+		}
 		$this->recordRequest();
 	}
 
@@ -63,73 +78,16 @@ class DTProvider{
 	@note if action is the name of a method, the appropriate method is called
 	*/
 	public function performAction($action=null){
+		$this->startSession(); //must go here for oauth token population
 		$action = (isset($action)?$action:$this->stringParam("act"));
-		try{
-			$meth = new ReflectionMethod($this,$action);
-			if(method_exists($this, $action) && $meth->isPublic()){
-				$this->setResponse($this->$action());
-			}else{
-				$this->shouldPerformAction($action);
-			}
-		}catch(Exception $e){
-			$this->shouldPerformAction($action);
+		$meth = new ReflectionMethod($this,$action);
+		if(method_exists($this, $action) && $meth->isPublic()){
+			$this->setResponse($this->$action());
 		}
 	}
-///@}
-
-//==================
-//! Request Methods
-//==================
-/**
-	@name Request Methods
-	helper methods for making additional requests to internal/external sources
-*/
-///@{
-
-/**
-	@todo fix cookie handling (only vaguely remember why this was required... something about multiple requests in quick succession)
-	@return returns the HTTPRequest response object
-*/
-	protected function makeHTTPRequest($url,$params=array(),$method="GET",$cookies=array()){
-		$r = new HttpRequest($url);
 	
-		if($method=="POST"){
-			$r->addPostFields($params);
-			$r->setMethod( HttpRequest::METH_POST );
-		}else{
-			$r->addQueryData($params);
-			$r->setMethod( HttpRequest::METH_GET );
-		}
-		
-		$r->setOptions(array('encodecookies'=>true,'useragent'=>'Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit\/536.26.17 (KHTML, like Gecko) Version\/6.0.2 Safari\/536.26.17'));
-		$r->addCookies($cookies);
-		try {
-		    $r->send();
-		    return $r;
-		} catch (HttpException $ex) {
-		    DTLog::error($ex->getMessage());
-		}
-		return null;
-	}
-	
-	/**
-		@return returns the body of the response
-	*/
-	protected function makeGETRequest($url,$params=array()){
-		$r = $this->makeHTTPRequest($url,$params,"GET");
-		if($r->getResponseCode()==200)
-			return $r->getResponseBody();
-		return null;
-	}
-	
-	/**
-		@return returns the body of the response
-	*/
-	protected function makePOSTRequest($url,$params=array()){
-		$r = $this->makeHTTPRequest($url,$params,"POST");
-		if($r->getResponseCode()==200)
-			return $r->getResponseBody();
-		return null;
+	public function setResponse($response){
+		$this->response->setResponse($response);
 	}
 ///@}
 	

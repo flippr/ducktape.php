@@ -19,8 +19,7 @@ class DTSQLiteDatabase extends DTDatabase{
 	}
 	
 	public function query($query){
-		if($this->conn->query($query)===false)
-			DTLog::error($this->conn->lastErrorMsg());
+		$result = $this->conn->exec($query);
 	}
 	
 	public function clean($param){

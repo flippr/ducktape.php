@@ -105,7 +105,8 @@ class DTModel implements arrayaccess {
     	@note values should be properly formatted for storage (including quotes)
     */
     public function storageProperties(array $defaults=array(),$purpose=null){
-		return $defaults;
+    	$public_params = json_decode(json_encode($this),true);
+		return array_merge($public_params,$defaults);
 	}
 	
 	/**
