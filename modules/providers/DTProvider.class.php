@@ -18,8 +18,10 @@ class DTProvider{
  */
 ///@{
 	public function param($name){
-		if(!isset($this->params[$name]))
+		if(!isset($this->params[$name])){
 			DTLog::warn("Attempt to access invalid parameter ({$name}). ".json_encode($this->params),1);
+			return null;
+		}
 		return $this->params[$name];
 	}
 
@@ -88,6 +90,10 @@ class DTProvider{
 	
 	public function setResponse($response){
 		$this->response->setResponse($response);
+	}
+	
+	public function responseCode(){
+		return $this->response->error();
 	}
 ///@}
 	

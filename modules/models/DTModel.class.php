@@ -9,7 +9,7 @@ class DTModel implements arrayaccess {
 	protected static $strict_properties = false;
 	protected static $storage_table = null;
 	
-	protected $identifier = 0;
+	public $id = 0;
 
     protected $_properties = array(); /** @internal */
     protected $_bypass_accessors = false; /** @internal a flag used to bypass accessors during construction */
@@ -34,9 +34,8 @@ class DTModel implements arrayaccess {
 			else //make sure we go through the strict set method
 				foreach($properties as $k=>$v)
 					$this[$k] = $v;
-		else{
+		else
 			DTLog::warn("Attempt to instantiate object from invalid type.",1);
-			}
 			
 		$this->_bypass_accessors = false; //make sure we use the accessors now
 	}
@@ -104,9 +103,27 @@ class DTModel implements arrayaccess {
     	@return returns an array of key-value pairs that can be used for storage
     	@note values should be properly formatted for storage (including quotes)
     */
-    public function storageProperties(array $defaults=array(),$purpose=null){
-    	$public_params = json_decode(json_encode($this),true);
+    public function publicProperties(array $defaults=array(),$purpose=null){
+		$public_params = array();
+		$ref = new ReflectionClass($this);
+		$publics = $ref->getProperties(ReflectionProperty::IS_PUBLIC);
+		foreach($publics as $p){
+			$k = $p->getName();
+			$public_params[$k] = $this[$k];
+		}
 		return array_merge($public_params,$defaults);
+	}
+	
+	public function storageProperties(DTDatabase $db,array $defaults=array(),$purpose=null){
+		$storage_params = array();
+		$cols = $db->columnsForTable(static::$storage_table);
+		if(count($cols)==0)
+			DTLog::error("Found 0 columns for table (".static::$storage_table.")");
+		foreach($cols as $k){
+			if($purpose!="insert"||$k!="id") //don't try to insert the id, assume it's autoincrementing
+				$storage_params[$k] = $this[$k];
+		}
+		return array_merge($storage_params,$defaults);
 	}
 	
 	/**
@@ -114,36 +131,24 @@ class DTModel implements arrayaccess {
 		@return returns the inserted id, or false if nothing was inserted
 	*/
 	public function insert(DTDatabase $db){
-		$properties = $this->storageProperties(array(),"insert");
-		if(count($properties)>0){
-			$cols_str = implode(",",array_keys($properties));
-			$vals_str = implode(",",array_values($properties));
-			$stmt = "INSERT INTO ".static::$storage_table." ({$cols_str}) VALUES ({$vals_str});";
-			return  $db->insert($stmt);
-		}
-		return false;
+		$qb = new DTQueryBuilder($db);
+		return $qb->from(static::$storage_table)->insert($this->storageProperties($db,array(),"insert"));
 	}
 	
 	/**
 		convenience method for basic updates based on storageProperties()
-		@note uses the object's identifier property for where-clause
+		@note uses the object's id property for where-clause
 	*/
 	public function update(DTDatabase $db){
-		$properties = $this->storageProperties(array(),"update");
-		if(count($properties)>0 && isset($this->storage_table)){
-			$set_str = implode(",",array_map(function($k,$v){return "{$k}={$v}";},array_keys($properties),$properties));
-			$stmt = "UPDATE {$this->storage_table} SET {$set_str} WHERE id={$this->identifier}";
-			$db->query($stmt);
-		}
+		$properties = $this->storageProperties($db,array(),"update");
+		return $db->where("id={$this->id}")->from(static::$storage_table)->update($properties);
 	}
 	
-	public function where($where_str){
-		$properties = $this->storageProperties(array(),"select");
-		if(count($properties)>0 && isset($this->storage_table)){
-			$cols_str = implode(",",array_keys($properties));
-			$stmt = "SELECT {$col_str} FROM {$this->storage_table} WHERE {$where_str}";
-			return $db->select($stmt);
-		}
-		return null;
+	public static function select(DTQueryBuilder $qb){
+		return $qb->from(static::$storage_table)->selectAs(get_called_class());
+	}
+	
+	public static function updateRows(DTQueryBuilder $qb,$params){
+		return $qb->from(static::$storage_table)->update($params);
 	}
 }

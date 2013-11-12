@@ -18,10 +18,7 @@ END;
 
 		$this->db = $this->initDB($init_sql);
 	}
-
-//===========
-//! Tests
-//===========
+	
 	public function testConstructor(){
 		$user = new DTUser(array("alias"=>"testuser","password"=>"testpass"));
 		$this->assertEquals($user["alias"],"testuser");

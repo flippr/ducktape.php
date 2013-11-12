@@ -3,11 +3,14 @@ require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTLocation{
 	public static function locationForString($str,$provider){
-		$location = array();
+		$location = null;
 		$url = "http://maps.googleapis.com/maps/api/geocode/json?sensor=true";
 		$geocoded = json_decode(DTHTTPRequest::makeGETRequest($url,array("address"=>$str)));
-		$location["lat"] = $geocoded->results[0]->geometry->location->lat;
-		$location["lng"] = $geocoded->results[0]->geometry->location->lng;
+		if(count($geocoded->results)>0){
+			$location = array();
+			$location["lat"] = $geocoded->results[0]->geometry->location->lat;
+			$location["lng"] = $geocoded->results[0]->geometry->location->lng;
+		}
 		return $location;
 	}
 	

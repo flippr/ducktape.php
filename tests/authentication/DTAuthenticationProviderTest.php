@@ -15,13 +15,9 @@ class DTAuthenticationProviderTest extends DTTestCase{
 			is_admin integer default 0
 		);
 END;
-
 		$this->provider = new DTAuthenticationProvider($this->initDB($init_sql));
 	}
-
-//================
-//! Tests
-//================
+	
 	public function testAuthenticate(){
 		$user = new DTUser(array("alias"=>"testuser","password"=>"testpass"));
 		$user->insert($this->provider->db);

@@ -2,6 +2,8 @@
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTPgSQLDatabase extends DTDatabase{
+	public $ilike = "ILIKE";
+
 	public function connect($db, $user, $pass, $host="localhost"){
 		$this->conn = @pg_connect("host={$host} dbname={$db} user={$user} password={$pass}");
 		if(!$this->conn)
@@ -57,5 +59,9 @@ class DTPgSQLDatabase extends DTDatabase{
 	public function execute_insert($name,$params){
 		$this->execute($name,$params);
 		return $this->last_insert_id();
+	}
+	
+	public function columnsForTable($table){
+		return null;
 	}
 }

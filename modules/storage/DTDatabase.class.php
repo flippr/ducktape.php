@@ -2,6 +2,7 @@
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 abstract class DTDatabase {
+	public $ilike = "LIKE"; //keyword for case-insensitive search
 	public $conn = null;
 
 	function __construct($database=null,$user=null,$password=null,$host=null){
@@ -31,7 +32,7 @@ abstract class DTDatabase {
 	/** @return returns an array of objects of type +class_name+ */
 	public function selectAs($query,$class_name){
 		$list = array();
-		$rows = $this->function($query);
+		$rows = $this->select($query);
 		foreach($rows as $r)
 			$list[] = new $class_name($r);
 		return $list;
@@ -46,4 +47,6 @@ abstract class DTDatabase {
 	abstract public function last_insert_id();
 	/** @return returns the id of the new row */
 	abstract public function insert($query);
+	
+	abstract public function columnsForTable($table);
 }

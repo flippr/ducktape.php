@@ -5,7 +5,6 @@ class DTUser extends DTModel{
 	protected static $strict_properties = true;
 	protected static $storage_table = "users";
 	
-	public $id;
 	public $alias;
 	public $password;
 	public $created_at;
@@ -17,6 +16,10 @@ class DTUser extends DTModel{
 //==============
 	public function setPassword($password){
 		$this->password = $this->encryptPassword($password);
+	}
+	
+	public function createdAt(){
+		return isset($this->created_at)?$this->created_at:date("Y-m-d H:i:s");
 	}
 	
 	/**
@@ -55,16 +58,6 @@ class DTUser extends DTModel{
 		$salt = substr($encrypted,-$salt_len);
 		$password = DTUser::encryptPassword($given,$salt);
 		return ($encrypted==$password);
-	}
-	
-	public function storageProperties(array $defaults=array()){
-		$created_at = isset($this->created_at)?$this->created_at:date("Y-m-d H:i:s"); //don't update created_at
-		return array_merge($defaults,parent::storageProperties(array(
-			"alias"=>"'{$this->alias}'",
-			"password"=>"'{$this->password}'",
-			"created_at"=>"'{$created_at}'",
-			"is_admin"=>"'{$this->is_admin}'",
-			"is_active"=>"'{$this->is_active}'")));
 	}
 	
 	public function isEqual(DTModel $o){

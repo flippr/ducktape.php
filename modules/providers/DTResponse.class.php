@@ -1,8 +1,9 @@
 <?php
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
-define("DT_ERR_NONE",0x0);
-define("DT_ERR_INVALID_KEY",0x1);
+define("DT_ERR_NONE",0);
+define("DT_ERR_INVALID_KEY",1);
+define("DT_ERR_FAILED_QUERY",2);
 
 class DTResponse{
 	protected $response = null;
@@ -16,7 +17,10 @@ class DTResponse{
 	}
 	
 	public function renderAsJSON(){
-		$json = json_encode($this->response["obj"]);
+		if($this->response["obj"] instanceof DTModel)
+			$json = json_encode($this->response["obj"]->publicProperties());
+		else
+			$json = json_encode($this->response["obj"]);
 		if($this->stringParam("callback") != ''){ //handle jsonp
 			header("Content-Type:application/javascript");
 			$json = $this->stringParam("callback")."( {$json} )";
@@ -25,7 +29,9 @@ class DTResponse{
 		echo $json;
 	}
 	
-	public function error($code){
+	public function error($code=null){
+		if(!isset($code))
+			return $this->response["err"];
 		$this->response["err"] = intval($code);
 	}
 }

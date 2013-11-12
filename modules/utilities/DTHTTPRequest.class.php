@@ -43,7 +43,7 @@ class DTHTTPRequest{
 	*/
 	public static function makeGETRequest($url,$params=array()){
 		$r = static::makeHTTPRequest($url,$params,"GET");
-		if($r->getResponseCode()==200)
+		if($r && $r->getResponseCode()==200)
 			return $r->getResponseBody();
 		return null;
 	}
@@ -53,7 +53,7 @@ class DTHTTPRequest{
 	*/
 	public static function makePOSTRequest($url,$params=array()){
 		$r = static::makeHTTPRequest($url,$params,"POST");
-		if($r->getResponseCode()==200)
+		if($r && $r->getResponseCode()==200)
 			return $r->getResponseBody();
 		return null;
 	}

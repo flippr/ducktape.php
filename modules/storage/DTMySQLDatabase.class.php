@@ -59,4 +59,8 @@ class DTMySQLDatabase extends DTDatabase{
 		}
 		$res->close();
 	}
+	
+	public function columnsForTable($table){
+		return null;
+	}
 }

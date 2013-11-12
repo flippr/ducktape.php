@@ -12,14 +12,14 @@ class DTSQLiteDatabase extends DTDatabase{
 			OSLog::error($this->conn->lastErrorMsg());
 			return $object;
 		}
-		while($result!==false && $row=$result->fetchArray()){
+		while($result!==false && $row=$result->fetchArray(SQLITE3_ASSOC)){
 			$object[] = $row;
 		}
 		return $object;
 	}
 	
 	public function query($query){
-		$result = $this->conn->exec($query);
+		$this->conn->exec($query);
 	}
 	
 	public function clean($param){
@@ -52,5 +52,13 @@ class DTSQLiteDatabase extends DTDatabase{
 	public function execute_insert($name,$params){
 		$this->execute($name,$params);
 		return $this->last_insert_id();
+	}
+	
+	public function columnsForTable($table){
+		return array_reduce(
+		  $this->select("PRAGMA table_info(`{$table}`)"),
+		  function($rV,$cV) { $rV[]=$cV['name']; return $rV; },
+		  array()
+		);
 	}
 }

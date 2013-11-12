@@ -23,7 +23,6 @@ class DTAuthenticationProvider extends DTProvider{
 		$alias = $this->stringParam("alias");
 		$password = $this->stringParam("password");
 		
-		//$u = DTUser::userForAlias($alias,$this->db);		
 		$u = new DTUser($this->db->where("alias='{$alias}'"));
 		return (isset($u) && $u["is_active"] && $u->verifyPassword($password));
 	}
