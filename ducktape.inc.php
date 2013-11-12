@@ -38,6 +38,7 @@ include_once(dirname(__FILE__)."/modules/providers/DTSecureProvider.class.php");
 include_once(dirname(__FILE__)."/modules/consumers/DTConsumer.class.php");
 
 include_once(dirname(__FILE__)."/modules/models/DTModel.class.php");
+require_once dirname(__FILE__)."/modules/models/DTSession.class.php";
 
 include_once dirname(__FILE__)."/modules/authentication/DTUser.class.php";
 include_once(dirname(__FILE__)."/modules/authentication/DTAuthenticationProvider.class.php");
