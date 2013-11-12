@@ -23,8 +23,14 @@ class DTAuthenticationProvider extends DTProvider{
 		$alias = $this->stringParam("alias");
 		$password = $this->stringParam("password");
 		
-		$u = new DTUser($this->db->where("alias='{$alias}'"));
-		return (isset($u) && $u["is_active"] && $u->verifyPassword($password));
+		$u = new DTUser($this->db->where("alias='{$alias}' and is_active=1"));
+		$success = ($u["id"]>0 && $u->verifyPassword($password));
+		if($success){
+			$session = DTSession::sharedSession();
+			$session["dt_user_id"] = $u["id"];
+		}else
+			$u = null;
+		return $u;
 	}
 }
 ///@}

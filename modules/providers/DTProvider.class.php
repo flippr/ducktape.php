@@ -80,7 +80,7 @@ class DTProvider{
 	@note if action is the name of a method, the appropriate method is called
 	*/
 	public function performAction($action=null){
-		$this->startSession(); //must go here for oauth token population
+		$this->session = DTSession::sharedSession(); //must go here for oauth token population
 		$action = (isset($action)?$action:$this->stringParam("act"));
 		$meth = new ReflectionMethod($this,$action);
 		if(method_exists($this, $action) && $meth->isPublic()){
