@@ -3,6 +3,7 @@ require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTProvider{
 	public $params = null;
+	public $session = null;
 	protected $response = null;
 	
 	function __construct($db=null){

@@ -2,6 +2,7 @@
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTSession extends DTModel{
+	protected static $shared_session = null;
 	protected static $_session_started = false;
 
 	/**
@@ -27,7 +28,17 @@ class DTSession extends DTModel{
 	*/
 	public function offsetSet($offset, $value){
 		$stored = parent::offsetSet($offset, $value);
-		if(isset($stored))
+		if(isset($stored) && session_id()!="")
 			$_SESSION[$offset] = $stored;	
 	}
+	
+	/**
+		@return returns a singleton instance of the current session
+	*/
+	public static function &sharedSession($defaults=null){
+		if(!isset($this->shared_session))
+			$this->sharedSession = new DTSession($defaults);
+		return $this->shared_session;
+	}
 }
+
