@@ -17,8 +17,7 @@ class DTSession extends DTModel{
 	}
 
 	public static function startSession(){
-		if(!DTSession::$_session_started
-			&& session_id() != "") //session was not started somewhere else
+		if(!DTSession::$_session_started) //session was not started somewhere else
 			session_start();
 		DTSession::$_session_started=true;
 	}
@@ -36,9 +35,9 @@ class DTSession extends DTModel{
 		@return returns a singleton instance of the current session
 	*/
 	public static function &sharedSession($defaults=null){
-		if(!isset($this->shared_session))
-			$this->sharedSession = new DTSession($defaults);
-		return $this->shared_session;
+		if(!isset(static::$shared_session))
+			static::$shared_session = new DTSession($defaults);
+		return static::$shared_session;
 	}
 }
 

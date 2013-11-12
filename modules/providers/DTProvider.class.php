@@ -6,7 +6,8 @@ class DTProvider{
 	public $session = null;
 	protected $response = null;
 	
-	function __construct($db=null){
+	function __construct($params=null,$db=null){
+		$this->params = isset($params)?$params:$_REQUEST;
 		$this->db = isset($db)?$db:DTSettings::$default_database;
 		$this->response = new DTResponse();
 	}
