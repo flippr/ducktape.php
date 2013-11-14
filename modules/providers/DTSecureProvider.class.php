@@ -16,7 +16,7 @@ class DTOAuthToken extends DTModel{
 		parent::__construct($paramsOrQuery);
 	}
 	
-	protected function updateToAccessToken($db){
+	public function updateToAccessToken($db){
 		$this["type"] = 1;
 		$this["status"] = 0;
 		$this["token"] = $this->generateToken();
@@ -69,9 +69,12 @@ class DTSecureProvider extends DTProvider{
 	}
 	
 	public function actionAccessToken(){
-		$req_tok = $this->db->clean($this->provider->token);
-		$request_token = new DTOAuthToken($this->db->where("type=0 AND token='{$req_tok}' AND status=1"));
-		if($request_token["token"]==$req_tok) return $this->setResponseCode(DT_ERR_UNAUTHORIZED_TOKEN);
+		$tok_str = $this->db->clean($this->provider->token);
+		try{
+			$token = new DTOAuthToken($this->db->where("type=0 AND token='{$tok_str}' AND status=1"));
+		}catch(Exception $e){
+			return $this->setResponseCode(DT_ERR_UNAUTHORIZED_TOKEN);
+		}
 		$token->updateToAccessToken($this->db);
 	    exit ("oauth_token={$token["token"]}&oauth_token_secret={$token["secret"]}");
 	}
