@@ -18,6 +18,7 @@ class DTAuthenticationProvider extends DTProvider{
 		@param user - the username
 		@param pass - the password
 		@param key - the request validation string
+		@return returns a valid user object, or null if authentication fails
 	*/
 	public function authenticate(){
 		$alias = $this->stringParam("alias");

@@ -23,9 +23,9 @@ END;
 		$user->insert($this->provider->db);
 		
 		$this->provider->params = array("alias"=>"testuser","password"=>"testpass");
-		$this->assertTrue($this->provider->authenticate(),"failed to authenticate testuser.");
+		$this->assertNotNull($this->provider->authenticate(),"failed to authenticate testuser.");
 		
 		$this->provider->params = array("alias"=>"testuser","password"=>"wrongpass");
-		$this->assertFalse($this->provider->authenticate(),"failed to deny authentication.");
+		$this->assertNull($this->provider->authenticate(),"failed to deny authentication.");
 	}
 }

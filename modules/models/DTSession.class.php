@@ -17,7 +17,7 @@ class DTSession extends DTModel{
 	}
 
 	public static function startSession(){
-		if(!DTSession::$_session_started) //session was not started somewhere else
+		if(!DTSession::$_session_started && session_id()=="") //session was not started somewhere else
 			session_start();
 		DTSession::$_session_started=true;
 	}

@@ -27,6 +27,8 @@ class DTModel implements arrayaccess {
     		$this->_bypass_accessors = true; //we want direct access to properties
     		if(isset(static::$storage_table))
 	    		$properties = $paramsOrQuery->from(static::$storage_table)->select1();
+	    	/*if(!isset($properties))
+    			throw new Exception('Failed to find properties.',1);*/
     	}
 		if(is_array($properties) && count(array_filter(array_keys($properties), 'is_string'))) // must be an associative array
 			if(static::$strict_properties==false)
