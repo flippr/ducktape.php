@@ -4,6 +4,8 @@ require_once dirname(__FILE__)."/../../ducktape.inc.php";
 define("DT_ERR_NONE",0);
 define("DT_ERR_INVALID_KEY",1);
 define("DT_ERR_FAILED_QUERY",2);
+define("DT_ERR_PROHIBITED_ACTION",3);
+define("DT_ERR_UNAUTHORIZED_TOKEN",4);
 
 class DTResponse{
 	protected $obj = null;
@@ -29,8 +31,8 @@ class DTResponse{
 	}
 	
 	public function error($code=null){
-		if(!isset($code))
-			return $this->err;
-		$this->err = intval($code);
+		if(isset($code))
+			$this->response["err"] = intval($code);
+		return $this->response["err"];
 	}
 }

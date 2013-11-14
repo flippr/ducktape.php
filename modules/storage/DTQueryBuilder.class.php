@@ -7,17 +7,9 @@ class DTQueryBuilder{
 	protected $where_clause = "1=1";
 	protected $limit_clause = "";
 	protected $order_by = "";
-	protected $not_found_callback = null;
-	protected $not_found_parameters = null;
 	
 	function __construct($db){
 		$this->db = $db;
-	}
-	
-	function notFound(callable $callback, $parameters=array()){
-		$this->not_found_callback = $callback;
-		$this->not_found_parameters = $parameters;
-		return $this;
 	}
 	
 	/**
@@ -50,8 +42,6 @@ class DTQueryBuilder{
 		if(count($rows)>0){
 			return $rows[0];
 		}
-		if(isset($this->not_found_callback))
-			return call_user_func($this->not_found_callback,$not_found_params);
 		return null;
 	}
 	

@@ -6,8 +6,7 @@ class DTProvider{
 	public $session = null;
 	protected $response = null;
 	
-	function __construct($params=null,$db=null){
-		$this->params = isset($params)?$params:$_REQUEST;
+	function __construct($db=null){
 		$this->db = isset($db)?$db:DTSettings::$default_database;
 		$this->response = new DTResponse();
 	}
@@ -81,13 +80,17 @@ class DTProvider{
 	@param action - the action to perform (uses 'act' param key, if null)
 	@note if action is the name of a method, the appropriate method is called
 	*/
-	public function performAction($action=null){
-		$this->session = DTSession::sharedSession(); //must go here for oauth token population
+	protected function performAction($action=null){
+		$this->startSession();
 		$action = (isset($action)?$action:$this->stringParam("act"));
 		$meth = new ReflectionMethod($this,$action);
 		if(method_exists($this, $action) && $meth->isPublic()){
 			$this->setResponse($this->$action());
 		}
+	}
+	
+	protected function startSession(){
+		$this->session = DTSession::sharedSession(); //must go here for oauth token population
 	}
 	
 	public function setResponse($response){
@@ -96,6 +99,10 @@ class DTProvider{
 	
 	public function responseCode(){
 		return $this->response->error();
+	}
+	
+	public function setResponseCode($code){
+		return $this->response->error($code);
 	}
 ///@}
 	

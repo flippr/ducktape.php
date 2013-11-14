@@ -18,19 +18,22 @@ class DTAuthenticationProvider extends DTProvider{
 		@param user - the username
 		@param pass - the password
 		@param key - the request validation string
+		@return returns a valid user object and sets the session variable +dt_user_id+, or null if authentication fails
 	*/
 	public function authenticate(){
 		$alias = $this->stringParam("alias");
 		$password = $this->stringParam("password");
 		
-		$u = new DTUser($this->db->where("alias='{$alias}' and is_active=1"));
-		$success = ($u["id"]>0 && $u->verifyPassword($password));
-		if($success){
-			$session = DTSession::sharedSession();
-			$session["dt_user_id"] = $u["id"];
-		}else
-			$u = null;
-		return $u;
+		try{
+			$u = new DTUser($this->db->where("alias='{$alias}' and is_active=1"));
+			if($u->verifyPassword($password)){
+				$session = DTSession::sharedSession();
+				$session["dt_user_id"] = $u["id"];
+				return $u;
+			}
+		}catch(Exception $e){}
+		
+		return null;
 	}
 }
 ///@}

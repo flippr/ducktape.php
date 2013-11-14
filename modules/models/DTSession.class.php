@@ -9,15 +9,15 @@ class DTSession extends DTModel{
 		gets a session model, starting the session if necessary
 		@param paramsOrQuery defaults to $_SESSION
 	*/
-	function __construct($paramsOrQuery=null){
+	function __construct(&$paramsOrQuery=null){
 		static::startSession();
 		if($paramsOrQuery==null)
-			$paramsOrQuery = $_SESSION;
+			$paramsOrQuery = &$_SESSION;
 		parent::__construct($paramsOrQuery);
 	}
 
 	public static function startSession(){
-		if(!DTSession::$_session_started) //session was not started somewhere else
+		if(!DTSession::$_session_started && session_id()=="") //session was not started somewhere else
 			session_start();
 		DTSession::$_session_started=true;
 	}
