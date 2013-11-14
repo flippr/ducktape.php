@@ -6,24 +6,23 @@ define("DT_ERR_INVALID_KEY",1);
 define("DT_ERR_FAILED_QUERY",2);
 
 class DTResponse{
-	protected $response = null;
-	
-	function __construct(){
-		$this->response = array("err"=>0,"obj"=>array());
-	}
+	protected $obj = null;
+	protected $err = 0;
 	
 	public function setResponse($obj){
-		$this->response["obj"] = $obj;
+		$this->obj = $obj;
 	}
 	
 	public function renderAsJSON(){
-		if($this->response["obj"] instanceof DTModel)
-			$json = json_encode($this->response["obj"]->publicProperties());
+		$response = array("err" => $this->err);
+		if($this->obj instanceof DTModel)
+			$response["obj"] = $this->obj->publicProperties();
 		else
-			$json = json_encode($this->response["obj"]);
-		if($this->stringParam("callback") != ''){ //handle jsonp
+			$response["obj"] = $this->obj;
+		$json = json_encode($response);
+		if(isset($_REQUEST["callback"])){ //handle jsonp
 			header("Content-Type:application/javascript");
-			$json = $this->stringParam("callback")."( {$json} )";
+			$json = $_REQUEST["callback"]."( {$json} )";
 		}else
 			header('Content-Type: application/json; charset=utf-8');
 		echo $json;
@@ -31,7 +30,7 @@ class DTResponse{
 	
 	public function error($code=null){
 		if(!isset($code))
-			return $this->response["err"];
-		$this->response["err"] = intval($code);
+			return $this->err;
+		$this->err = intval($code);
 	}
 }
