@@ -49,5 +49,5 @@ include_once(dirname(__FILE__)."/tests/DTTestCase.class.php");
 include_once(dirname(__FILE__)."/tests/DTGeoTestCase.class.php");
 
 //set up the default database connection
-/*$database_connector = DTSettings::$storage["default"]["connector"];
-DTSettings::$default_database = new $database_connector();*/
+$database_connector = DTSettings::$storage["default"]["connector"];
+DTSettings::$default_database = new $database_connector();

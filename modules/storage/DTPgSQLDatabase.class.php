@@ -64,6 +64,12 @@ class DTPgSQLDatabase extends DTDatabase{
 	}
 	
 	public function columnsForTable($table){
-		return null;
+		$stmt = "select column_name from information_schema.columns where
+table_name='{$table}'";
+		return array_reduce(
+		  $this->select($stmt),
+		  function($rV,$cV) { $rV[]=$cV['column_name']; return $rV; },
+		  array()
+		);
 	}
 }

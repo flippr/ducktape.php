@@ -16,12 +16,12 @@ class DTLog{
 	}
 	
 	/** currently an alias for info **/
-	public function warn($msg,$bt_offset=0){
+	public function warn($msg,$bt_offset=1){
 		DTLog::info($msg,$bt_offset);
 	}
 	
 	/** emit warnings/information */
-	public function info($msg,$bt_offset=0){
+	public function info($msg,$bt_offset=1){
 		DTLog::write(DTLog::$info_fp,$msg,$bt_offset);
 	}
 	

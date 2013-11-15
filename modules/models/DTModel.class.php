@@ -18,7 +18,6 @@ class DTModel implements arrayaccess {
     	@param paramsOrQuery - an assoc. array of default properties or DTQueryBuilder object
     */
     function __construct($paramsOrQuery=null){
-    	$properties = array();
    		if(!isset($paramsOrQuery))
     		return; //just create an empty object
 		if(is_array($paramsOrQuery)){
@@ -30,12 +29,11 @@ class DTModel implements arrayaccess {
 	    	if(!isset($properties))
     			throw new Exception('Failed to find object in storage.',1);
     	}
-		if(is_array($properties) && count(array_filter(array_keys($properties), 'is_string'))) // must be an associative array
-			//make sure we go through the set method
+		if(is_array($properties) && (count($properties)==0 || count(array_filter(array_keys($properties),'is_string')))) // must be an associative array
 			foreach($properties as $k=>$v)
-				$this[$k] = $v;
+				$this[$k] = $v;//make sure we go through the set method
 		else
-			DTLog::warn("Attempt to instantiate object from invalid type.",1);
+			DTLog::warn("Attempt to instantiate ".get_called_class()." from invalid type (".json_encode($properties).")",1);
 			
 		$this->_bypass_accessors = false; //make sure we use the accessors now
 	}

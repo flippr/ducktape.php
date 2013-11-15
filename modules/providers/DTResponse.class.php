@@ -32,7 +32,7 @@ class DTResponse{
 	
 	public function error($code=null){
 		if(isset($code))
-			$this->response["err"] = intval($code);
-		return $this->response["err"];
+			$this->err = intval($code);
+		return $this->err;
 	}
 }

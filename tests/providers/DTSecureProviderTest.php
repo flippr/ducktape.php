@@ -14,6 +14,14 @@ class DTSecureProviderTest extends DTTestCase{
 			secret text
 		);
 		
+		CREATE TABLE consumers (
+			id integer primary key autoincrement,
+			name text,
+			consumer_key text,
+			secret text,
+			status int default 1
+		);
+		
 		INSERT INTO tokens (type,status,token,secret) VALUES (0,0,'requesttoken','requestsecret');
 		INSERT INTO tokens (type,status,token,secret) VALUES (0,1,'authorizedrequesttoken','requestsecret');
 		INSERT INTO tokens (type,status,token,secret) VALUES (1,0,'accesstoken','accesssecret');

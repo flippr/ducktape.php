@@ -8,6 +8,7 @@ class DTProvider{
 	
 	function __construct($db=null){
 		$this->db = isset($db)?$db:DTSettings::$default_database;
+		$this->params = $_REQUEST;
 		$this->response = new DTResponse();
 	}
 	
@@ -20,7 +21,7 @@ class DTProvider{
 ///@{
 	public function param($name){
 		if(!isset($this->params[$name])){
-			DTLog::warn("Attempt to access invalid parameter ({$name}). ".json_encode($this->params),1);
+			//DTLog::warn("Attempt to access invalid parameter ({$name}). ".json_encode($this->params),1);
 			return null;
 		}
 		return $this->params[$name];
@@ -83,9 +84,13 @@ class DTProvider{
 	protected function performAction($action=null){
 		$this->startSession();
 		$action = (isset($action)?$action:$this->stringParam("act"));
-		$meth = new ReflectionMethod($this,$action);
-		if(method_exists($this, $action) && $meth->isPublic()){
-			$this->setResponse($this->$action());
+		try{
+			$meth = new ReflectionMethod($this,$action);
+			if(method_exists($this, $action) && $meth->isPublic()){
+				$this->setResponse($this->$action());
+			}
+		}catch(Exception $e){
+			DTLog::warn("Action not found ({$action}).");
 		}
 	}
 	

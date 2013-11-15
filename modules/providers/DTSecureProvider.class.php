@@ -31,6 +31,7 @@ class DTOAuthToken extends DTModel{
 
 class DTSecureProvider extends DTProvider{
 	protected $auth_url = null;
+	protected $provider = null;
 	
 	function __construct($params=null,$db=null,$auth_url="/login.php"){
 		$this->auth_url = $auth_url;
@@ -44,7 +45,8 @@ class DTSecureProvider extends DTProvider{
 	}
 
 	public function handleRequest(){
-		if($action!="request_token" && $action!="access_token"){
+		$action = $this->stringParam("act");
+		//if($action!="request_token" && $action!="access_token"){
 			try {
 				$this->provider = new OAuthProvider();
 				$this->provider->consumerHandler(array($this,'lookupConsumer'));	
@@ -53,9 +55,10 @@ class DTSecureProvider extends DTProvider{
 				$this->provider->setRequestTokenPath($_SERVER["PHP_SELF"]."?act=request_token"); // No auth_token needed for this end point -- this is critical to get things working!
 				$this->provider->checkOAuthRequest();
 			} catch (OAuthException $E) {
+				DTLog::warn("Could not complete OAuth request ({$action}).");
 				return $this->setResponseCode(DT_ERR_PROHIBITED_ACTION); //we need to fail out
 			}
-		}
+		//}
 		parent::handleRequest(); //very well, carry on
 	}
 
@@ -69,6 +72,7 @@ class DTSecureProvider extends DTProvider{
 	}
 	
 	public function actionAccessToken(){
+		DTLog::debug("actionAccessToken");
 		$tok_str = $this->db->clean($this->provider->token);
 		try{
 			$token = new DTOAuthToken($this->db->where("type=0 AND token='{$tok_str}' AND status=1"));
