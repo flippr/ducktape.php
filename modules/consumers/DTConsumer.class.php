@@ -2,8 +2,6 @@
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTConsumer{
-	protected $consumer_key;
-	protected $consumer_secret;
 	protected $provider_url;
 	protected $provider_name;
 	protected $oauth;
@@ -20,20 +18,20 @@ class DTConsumer{
 		@param provider_name the name of a provider listed in the oauth.yml settings
 	*/
 	function __construct($provider_name){
-		$this->oauth = new OAuth($consumer_key,$consumer_secret,OAUTH_SIG_METHOD_HMACSHA1,OAUTH_AUTH_TYPE_AUTHORIZATION);
 		$this->provider_name = $provider_name;
 		$this->provider_url = DTSettings::$oauth[$provider_name]["url"];
-		$this->consumer_key = DTSettings::$oauth[$provider_name]["consumer_key"];
-		$this->consumer_secret = DTSettings::$oauth[$provider_name]["consumer_secret"];
+		$consumer_key = DTSettings::$oauth[$provider_name]["consumer_key"];
+		$consumer_secret = DTSettings::$oauth[$provider_name]["consumer_secret"];
+		$this->oauth = new OAuth($consumer_key,$consumer_secret,OAUTH_SIG_METHOD_HMACSHA1,OAUTH_AUTH_TYPE_AUTHORIZATION);
 	}
 	
 	/** returns a valid access token from the session, or null */
 	protected function accessToken(){
-		return (isset($_SESSION[$this->provider_name."_access_token"]?$_SESSION[$this->provider_name."_access_token"]["oauth_token"]:null);
+		return (isset($_SESSION[$this->provider_name."_access_token"])?$_SESSION[$this->provider_name."_access_token"]["oauth_token"]:null);
 	}
 	
 	protected function accessTokenSecret(){
-		return (isset($_SESSION[$this->provider_name."_access_token"]?$_SESSION[$this->provider_name."_access_token"]["oauth_token_secret"]:null);
+		return (isset($_SESSION[$this->provider_name."_access_token"])?$_SESSION[$this->provider_name."_access_token"]["oauth_token_secret"]:null);
 	}
 	
 	protected function setAccessToken($key, $secret){
@@ -41,11 +39,11 @@ class DTConsumer{
 	}
 	
 	protected function requestToken(){
-		return (isset($_SESSION[$this->provider_name."_request_token"]?$_SESSION[$this->provider_name."_request_token"]["oauth_token"]:null);
+		return (isset($_SESSION[$this->provider_name."_request_token"])?$_SESSION[$this->provider_name."_request_token"]["oauth_token"]:null);
 	}
 	
 	protected function requestTokenSecret(){
-		return (isset($_SESSION[$this->provider_name."_request_token"]?$_SESSION[$this->provider_name."_request_token"]["oauth_token_secret"]:null);
+		return (isset($_SESSION[$this->provider_name."_request_token"])?$_SESSION[$this->provider_name."_request_token"]["oauth_token_secret"]:null);
 	}
 	
 	protected function setRequestToken($key, $secret){
@@ -77,9 +75,9 @@ class DTConsumer{
 			$response = json_decode($this->sendRequestToProvider($params,$method),true);
 			return $response->obj;
 		}else{
-			if (isset($this->requestToken()){ //we don't have an access token yet, go get one
+			if ($this->requestToken()!=null){ //we don't have an access token yet, go get one
 				$this->oauthAccessToken();
-				$this->request($params,$method); //do it again, this time with the access token
+//!!!!				$this->request($params,$method); //do it again, this time with the access token
 			}else{ //we're just getting started, send us to the login page with a request token
 				$this->oauthRequestToken();
 				$this->oauthAuthorize();
@@ -93,6 +91,7 @@ class DTConsumer{
 	*/
 	function oauthRequestToken() {
 		$response = $this->sendRequestToProvider(array('act' => 'request_token'));
+		var_dump($response);
 		parse_str($response,$params);
 		$this->setRequestToken($params["oauth_token"],$params["oauth_token_secret"]);
 		$_SESSION["oauth_login_url"] = $params["login_url"];
@@ -117,7 +116,9 @@ class DTConsumer{
 	// Step 3: Exchange the temporary token for a permanent access token
 	function oauthAccessToken($redirect=true) {
 		$this->oauth->setToken($this->requestToken(),$this->requestTokenSecret());
-		parse_str($this->sendRequestToProvider(array('action'=>'access_token')),$params);
+		$response = $this->sendRequestToProvider(array('action'=>'access_token'));
+		var_dump($response);
+		parse_str($response,$params);
 		$this->setAccessToken($params["oauth_token"],$params["oauth_token_secret"]);
 		$this->clearRequestToken();
 	}
