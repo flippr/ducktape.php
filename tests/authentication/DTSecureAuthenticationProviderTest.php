@@ -1,7 +1,7 @@
 <?php
 require_once(dirname(__FILE__)."/../../ducktape.inc.php");
 
-class DTAuthenticationProviderTest extends DTTestCase{
+class DTSecureAuthenticationProviderTest extends DTTestCase{
 	protected $provider;
 
 	public function setUp(){
@@ -17,32 +17,36 @@ class DTAuthenticationProviderTest extends DTTestCase{
 			is_admin integer default 0
 		);
 		
+		CREATE TABLE tokens (
+			id integer primary key autoincrement,
+			type int default 0,
+			status int default 0,
+			token text,
+			secret text
+		);
+		
 		INSERT INTO users (alias, password) VALUES ('testuser','{$encrypted}');
+		
+		INSERT INTO tokens (type,status,token,secret) VALUES (0,0,'requesttoken','requestsecret');
 END;
 		$this->provider = new DTAuthenticationProvider($this->initDB($init_sql));
 	}
 	
 	public function testActionAuthenticate(){
 		$session = DTSession::sharedSession(); //start up a session
-		$this->provider->params = array("alias"=>"testuser","password"=>"testpass");
+		$this->provider->params = array("alias"=>"testuser","password"=>"testpass","oauth_token"=>"requesttoken");
 		$u = $this->provider->actionAuthenticate();
-		$this->assertNotNull($u,"failed to authenticate testuser.");
-		$this->assertEquals($u["id"], $session["dt_user_id"]);
+		
+		$token = new DTOAuthToken($this->provider->db->where("token='requesttoken' AND type=0"));
+		$this->assertEquals(1,$token["status"]);
 	}
 	
 	public function testBadPassword(){
 		$session = DTSession::sharedSession(); //start up a session
-		$this->provider->params = array("alias"=>"testuser","password"=>"wrongpass");
+		$this->provider->params = array("alias"=>"testuser","password"=>"wrongpass","oauth_token"=>"requesttoken");
 		$u = $this->provider->actionAuthenticate();
-		$this->assertNull($u,"failed to deny authentication.");
-		$this->assertFalse(isset($session["dt_user_id"]));
-	}
-	
-	public function testNonUser(){
-		$session = DTSession::sharedSession(); //start up a session
-		$this->provider->params = array("alias"=>"notauser","password"=>"doesntmatter");
-		$u = $this->provider->actionAuthenticate();
-		$this->assertNull($u,"failed to deny non-user");
-		$this->assertFalse(isset($session["dt_user_id"]));
+		
+		$token = new DTOAuthToken($this->provider->db->where("token='requesttoken' AND type=0"));
+		$this->assertEquals(0,$token["status"]);
 	}
 }

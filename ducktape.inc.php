@@ -11,13 +11,13 @@ if (version_compare(PHP_VERSION, '5.3') < 0) {
 
 //3rd party libs
 require_once dirname(__FILE__).'/lib/gisconverter.php/gisconverter.php';
+//require_once dirname(__FILE__).'/lib/tmhoauth/tmhOAuth.php';
 
 $local_dir = dirname(__FILE__)."/../local"; //local server settings
 
 //check for cgi access and populate $_REQUEST
-if(isset($argc)){
+if(isset($argc))
 	parse_str(implode('&',array_slice($argv,1)), $_REQUEST);
-}
 
 $base_path = dirname(__FILE__);
 
@@ -35,16 +35,18 @@ include_once($base_path."/modules/storage/DTGeoSQLiteDatabase.class.php");
 
 include_once($base_path."/modules/models/DTModel.class.php");
 require_once $base_path."/modules/models/DTSession.class.php";
+require_once($base_path."/modules/models/DTOAuthToken.class.php");
 
 include_once($base_path."/modules/providers/DTResponse.class.php");
 include_once($base_path."/modules/providers/DTProvider.class.php");
 include_once($base_path."/modules/providers/DTSecureProvider.class.php");
 
 include_once($base_path."/modules/consumers/DTConsumer.class.php");
+include_once($base_path."/modules/consumers/DTSecureConsumer.class.php");
 
 include_once $base_path."/modules/authentication/DTUser.class.php";
 include_once($base_path."/modules/authentication/DTAuthenticationProvider.class.php");
-
+include_once($base_path."/modules/authentication/DTSecureAuthenticationProvider.class.php");
 
 include_once 'PHPUnit/Autoload.php';
 include_once($base_path."/tests/DTTestCase.class.php");

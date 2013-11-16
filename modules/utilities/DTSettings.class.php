@@ -15,4 +15,3 @@ class DTSettings{
 
 DTSettings::$config = yaml_parse_file("{$local_dir}/config.yml");
 DTSettings::$storage = yaml_parse_file("{$local_dir}/storage.yml");
-DTSettings::$oauth = yaml_parse_file("{$local_dir}/oauth.yml");

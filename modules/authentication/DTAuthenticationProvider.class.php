@@ -20,10 +20,9 @@ class DTAuthenticationProvider extends DTProvider{
 		@param key - the request validation string
 		@return returns a valid user object and sets the session variable +dt_user_id+, or null if authentication fails
 	*/
-	public function authenticate(){
+	public function actionAuthenticate(){
 		$alias = $this->stringParam("alias");
 		$password = $this->stringParam("password");
-		
 		try{
 			$u = new DTUser($this->db->where("alias='{$alias}' and is_active=1"));
 			if($u->verifyPassword($password)){
