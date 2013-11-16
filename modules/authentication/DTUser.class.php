@@ -6,8 +6,8 @@ class DTUser extends DTModel{
 	protected static $storage_table = "users";
 	
 	public $alias;
-	public $password;
-	public $created_at;
+	protected $password;
+	protected $created_at;
 	public $is_admin = 0;
 	public $is_active = 1;
 	

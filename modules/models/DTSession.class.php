@@ -34,7 +34,7 @@ class DTSession extends DTModel{
 	/**
 		@return returns a singleton instance of the current session
 	*/
-	public static function &sharedSession($defaults=null){
+	public static function sharedSession($defaults=null){
 		if(!isset(static::$shared_session))
 			static::$shared_session = new DTSession($defaults);
 		return static::$shared_session;

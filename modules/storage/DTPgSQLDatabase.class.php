@@ -14,7 +14,7 @@ class DTPgSQLDatabase extends DTDatabase{
 	public function select($query){
 		$result = @pg_query($this->conn,$query);
 		if(!$result)
-			DTLog::error("Query failed; {$query}");
+			DTLog::error("Query failed:".pg_last_error().":{$query}");
 		$rows = @pg_fetch_all($result);
 		if(!$rows){
 			$rows = array();

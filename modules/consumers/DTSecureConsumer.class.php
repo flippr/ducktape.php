@@ -1,161 +1,123 @@
 <?php
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
-/**
-	we don't use the standard PHP oauth library, because disableSSLChecks is not available making SSL for dev sites difficult
-*/
-
 class DTSecureConsumer extends DTConsumer{
-	protected $provider_name;
 	protected $oauth;
 	protected $tmhOAuth;
+	protected $session;
 	
-	/**
+	/*
 	 this is normally 'oauth_verifier', but since we do not have control
 	 over the parameter name returned after authorization, we need to allow
-	 subclasses to override (thanks for sucking, Facebook)
+	 subclasses to override (thanks for sucking at standards, Facebook)
 	*/
 	protected $param_initiate_access_token = "oauth_verifier";
-	public $access_token_name = "dt_access_token"; //defines where to store the access token for this consumer in the session
 	
-	/**
-		@param provider_name the name of a provider listed in the oauth.yml settings
-	*/
 	function __construct($provider_url,$consumer_key,$consumer_secret){
 		parent::__construct($provider_url);
-	
-		$this->provider_name = "oauth"; //currently only allows 1 oauth process at a time
 		$this->oauth = new OAuth($consumer_key,$consumer_secret);
-		if(DTSettings::$config["logs"]["debug"])
-			$this->oauth->debug = true;
-		/*$this->tmhOAuth = new tmhOAuth(array(
-			'host' => $this->provider_url,
-		    'consumer_key'    => $consumer_key,
-		    'consumer_secret' => $consumer_secret,
-		    'use_ssl' => (preg_match("/^https/",$this->provider_url)?true:false),
-		    'curl_ssl_verifyhost' => 0,
-		    'curl_ssl_verifypeer' => 0
-		));*/
-	}
-	
-	/** returns a valid access token from the session, or null */
-	protected function accessToken(){
-		return (isset($_SESSION[$this->provider_name."_access_token"])?$_SESSION[$this->provider_name."_access_token"]["oauth_token"]:null);
-	}
-	
-	protected function accessTokenSecret(){
-		return (isset($_SESSION[$this->provider_name."_access_token"])?$_SESSION[$this->provider_name."_access_token"]["oauth_token_secret"]:null);
-	}
-	
-	protected function setAccessToken($key, $secret){
-		$_SESSION[$this->provider_name."_access_token"]=array("oauth_token"=>$key,"oauth_token_secret"=>$secret);
-	}
-	
-	protected function clearAccessToken(){
-		unset($_SESSION[$this->provider_name."_access_token"]);
-	}
-	
-	protected function requestToken(){
-		return (isset($_SESSION[$this->provider_name."_request_token"])?$_SESSION[$this->provider_name."_request_token"]["oauth_token"]:null);
-	}
-	
-	protected function requestTokenSecret(){
-		return (isset($_SESSION[$this->provider_name."_request_token"])?$_SESSION[$this->provider_name."_request_token"]["oauth_token_secret"]:null);
-	}
-	
-	protected function setRequestToken($key, $secret){
-		$_SESSION[$this->provider_name."_request_token"]=array("oauth_token"=>$key,"oauth_token_secret"=>$secret);
-	}
-	
-	protected function clearRequestToken(){
-		unset($_SESSION[$this->provider_name."_request_token"]);
+		$this->session = DTSession::sharedSession();
 	}
 	
 	/**
-		makes call to provider (regardless of access_token status)
-		handles response codes, callback etc
-		@return returns a json_decoded version of the response
+		makes call to provider
+		@return returns a string containing the response
 	*/
 	protected function sendRequestToProvider($params,$method="POST",$multipart=false){
 		$mtd = (strtolower($method)=="get"?OAUTH_HTTP_METHOD_GET:OAUTH_HTTP_METHOD_POST);
 		try {
 		    $this->oauth->fetch($this->provider_url,$params,$mtd);
-		    return $this->oauth->getLastResponse();
+		    return isset($params["callback"])?preg_replace("/^.*?\((.*)\)/","\\1",$this->oauth->getLastResponse()):$this->oauth->getLastResponse();
 		} catch(OAuthException $E) {
 		    DTLog::error("Response: ". json_encode($E) . "\n");
 		}
-		
-		/*$code = $this->tmhOAuth->request($method,$this->provider_url,$params, true, $multipart);
-		//var_dump($this->tmhOAuth);
-		return $this->tmhOAuth->response['response'];*/
 	}
 
+	/** primary method of making a request to a DTSecureProvider and negotiating OAuth protocol */
 	public function request(array $params, $method='POST'){
 		if($this->accessToken()){ //we've got the access token, just make the request already!
-			//$this->oauth->setToken($this->accessToken(),$this->accessTokenSecret());
-			$this->tmhOAuth->config['user_token']  = $this->accessToken();
-			$this->tmhOAuth->config['user_secret'] = $this->accessTokenSecret();
+			$this->oauth->setToken($this->accessToken(),$this->accessTokenSecret());
 			$response = json_decode($this->sendRequestToProvider($params,$method),true);
-			return $response->obj;
+			if($response)
+				return $response["obj"];
 		}else{
-			if ($this->requestToken()!=null){ //we don't have an access token yet, go get one
-				DTLog::debug("Step 2: Get an access token...");
+			if(isset($_REQUEST[$this->param_initiate_access_token])){ //session doesn't exist yet...
 				$this->oauthAccessToken();
-				$this->request($params,$method); //do it again, this time with the access token
+				$this->redirect(urldecode($this->session["oauth_origin"]));
 			}else{ //we're just getting started, send us to the login page with a request token
-				DTLog::debug("Step 1: Get a request token...");
 				$this->oauthRequestToken();
-				$this->oauthAuthorize();
+				$this->redirect("{$this->session["oauth_login_url"]}?oauth_token=".$this->requestToken());
 			}
 		}
 	}
 	
+	/** convenience method for making a request and returning the result as JSON */
 	public function requestAsJSON(array $params, $method='POST'){
 		$response = new DTResponse($this->request($params,$method));
 		$response->renderAsJSON();
 	}
 	
-	/**
-		Step 1: Request a temporary token
-		@return returns the request token and stores it in $_SESSION
-	*/
-	function oauthRequestToken() {
-		//$response = $this->sendRequestToProvider(array('act' => 'request_token'));
-		$this->oauth->disableSSLChecks(); //this should be removed at some point...
-		$response = $this->oauth->getRequestToken($this->provider_url."?act=request_token");
-		$this->setRequestToken($response["oauth_token"],$response["oauth_token_secret"]);
-		$_SESSION["oauth_login_url"] = $response["login_url"];
-		$req_tok = $response["oauth_token"];
-		//set up the next step in the process (assuming you will want to login with this token)
-		$_SESSION["he_target"] = urlencode($_SERVER["PHP_SELF"]."?oauth_token={$req_tok}&{$this->param_initiate_access_token}=");
-		return $req_tok;
-	}
-	
-	// Step 2: Direct the user to the authorize web page
-	function oauthAuthorize() {
-		$req_tok = $this->requestToken();
-	    parse_str($_SERVER["QUERY_STRING"],$params);
-	    $params["oauth_token"] = $req_tok;
-	    $query_string = http_build_query($params);
-		$authurl = "{$_SESSION["oauth_login_url"]}?{$query_string}";
+	/** if the +async+ parameter is specified, returns a response suitable for client-side redirection */
+	protected function redirect($url){
 		if(isset($_REQUEST['async'])){
 			header('HTTP/1.1 278 Client Redirect', true, 278);
-			echo json_encode(array("location"=>$authurl));
-			//$response = new DTResponse(array("location"=>$authurl));
-			//$response->renderAsJSON();
-		}else{
-			header("Location: {$authurl}");
-		}
-		exit(); //must have this to prevent multiple token generation
+			$response = new DTResponse(array("location"=>$url));
+			$response->renderAsJSON();
+		}else
+			header("Location: {$url}");
+		exit;
 	}
 	
-	// Step 3: Exchange the temporary token for a permanent access token
+	/** Request a temporary token */
+	function oauthRequestToken() {
+		$response = $this->oauth->getRequestToken($this->provider_url."/request_token?act=request_token");
+		$this->setRequestToken($response["oauth_token"],$response["oauth_token_secret"]);
+		$req_tok = $response["oauth_token"];
+		if(isset($response["login_url"]))
+			$this->session["oauth_login_url"] = $response["login_url"];
+		else{
+			exit("No login url returned.");
+		}
+		if(isset($_REQUEST['async']))//remember where we came from
+			$this->session["oauth_origin"] = isset($_SERVER["HTTP_REFERER"])?urlencode($_SERVER["HTTP_REFERER"]):""; 
+		else
+			$this->session["oauth_origin"] = isset($_SERVER["PHP_SELF"])?urlencode($_SERVER["PHP_SELF"]):"";
+	}
+	
+	/** Exchange the temporary token for a permanent access token */
 	function oauthAccessToken() {
-		DTLog::debug("access token");
+		$token = $this->requestToken();
+		$secret = $this->requestTokenSecret();
 		$this->oauth->setToken($this->requestToken(),$this->requestTokenSecret());
-		//$response = $this->sendRequestToProvider(array('act'=>'access_token'));
 		$response = $this->oauth->getAccessToken($this->provider_url."?act=access_token");
 		$this->setAccessToken($response["oauth_token"],$response["oauth_token_secret"]);
-		$this->clearRequestToken();
+		unset($this->session["oauth_request_token"]);
+		unset($this->session["oauth_request_secret"]);
+	}
+	
+	protected function accessToken(){
+		return $this->session["oauth_access_token"];
+	}
+	
+	protected function accessTokenSecret(){
+		return $this->session["oauth_access_secret"];
+	}
+	
+	protected function setAccessToken($key, $secret){
+		$this->session["oauth_access_token"] = $key;
+		$this->session["oauth_access_secret"] = $secret;
+	}
+	
+	protected function requestToken(){
+		return $this->session["oauth_request_token"];
+	}
+	
+	protected function requestTokenSecret(){
+		return $this->session["oauth_request_secret"];
+	}
+	
+	protected function setRequestToken($key, $secret){
+		$this->session["oauth_request_token"] = $key;
+		$this->session["oauth_request_secret"] = $secret;
 	}
 }

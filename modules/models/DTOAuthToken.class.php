@@ -5,14 +5,15 @@ class DTOAuthToken extends DTModel{
 	protected $_strict_properties = true;
 	public static $storage_table = "tokens";
 
-	protected $type;
-	protected $status;
+	protected $type = 0;
+	protected $status = 0;
 	protected $token;
 	protected $secret;
+	protected $consumer_id;
 
 	public function __construct($paramsOrQuery=null){
-		if(!isset($paramsOrQuery)) //empty tokens have a token and secret generated randomly
-			$paramsOrQuery = array("token"=>static::generateToken(),"secret"=>static::generateToken());
+		if(!$paramsOrQuery instanceof DTQueryBuilder) //new tokens have a token and secret generated randomly
+			$paramsOrQuery = array_merge($paramsOrQuery,array("token"=>static::generateToken(),"secret"=>static::generateToken()));
 		parent::__construct($paramsOrQuery);
 	}
 	

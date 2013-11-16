@@ -102,8 +102,12 @@ class DTProvider{
 		$this->response->setResponse($response);
 	}
 	
+	/**
+		@return returns null so that it may be chained with an action's return statement
+	*/
 	public function responseCode(){
-		return $this->response->error();
+		$this->response->error();
+		return null;
 	}
 	
 	public function setResponseCode($code){

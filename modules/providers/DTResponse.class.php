@@ -8,8 +8,12 @@ define("DT_ERR_PROHIBITED_ACTION",3);
 define("DT_ERR_UNAUTHORIZED_TOKEN",4);
 
 class DTResponse{
-	protected $obj = null;
+	protected $obj;
 	protected $err = 0;
+	
+	function __construct($obj=null){
+		$this->obj = $obj;
+	}
 	
 	public function setResponse($obj){
 		$this->obj = $obj;
