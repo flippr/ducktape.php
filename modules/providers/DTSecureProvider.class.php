@@ -46,19 +46,19 @@ class DTSecureProvider extends DTProvider{
 
 	public function handleRequest(){
 		$action = $this->stringParam("act");
-		//if($action!="request_token" && $action!="access_token"){
+		if($action!="request_token"){
 			try {
 				$this->provider = new OAuthProvider();
 				$this->provider->consumerHandler(array($this,'lookupConsumer'));	
 				$this->provider->timestampNonceHandler(array($this,'timestampNonceChecker'));
 				$this->provider->tokenHandler(array($this,'tokenHandler'));
-				$this->provider->setRequestTokenPath($_SERVER["PHP_SELF"]."?act=request_token"); // No auth_token needed for this end point -- this is critical to get things working!
+				$this->provider->setRequestTokenPath($_SERVER["PHP_SELF"]); // No auth_token needed for this end point -- this is critical to get things working!
 				$this->provider->checkOAuthRequest();
 			} catch (OAuthException $E) {
 				DTLog::warn("Could not complete OAuth request ({$action}).");
 				return $this->setResponseCode(DT_ERR_PROHIBITED_ACTION); //we need to fail out
 			}
-		//}
+		}
 		parent::handleRequest(); //very well, carry on
 	}
 
