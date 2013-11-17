@@ -6,9 +6,9 @@ class DTSecureProvider extends DTProvider{
 	protected $provider = null;
 	protected $consumer_id = null;
 	
-	function __construct($params=null,$db=null,$auth_url="/login.php"){
+	function __construct($db=null,$auth_url="/login.php"){
 		$this->auth_url = $auth_url;
-		parent::__construct($params,$db);
+		parent::__construct($db);
 	}
 	
 	protected function startSession(){
@@ -26,7 +26,7 @@ class DTSecureProvider extends DTProvider{
 			$this->provider->setRequestTokenPath(dirname($_SERVER["PHP_SELF"])."/request_token"); // No auth_token needed for this end point -- this is critical to get things working!
 			$this->provider->checkOAuthRequest();
 		} catch (OAuthException $E) {
-			$action = $this->stringParam("act");
+			$action = $this->params->stringParam("act");
 			DTLog::warn("Could not complete OAuth request ({$action}).");
 			return $this->setResponseCode(DT_ERR_PROHIBITED_ACTION); //we need to fail out
 		}

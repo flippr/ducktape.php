@@ -3,12 +3,10 @@ require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTSecureConsumer extends DTConsumer{
 	protected $oauth;
-	protected $tmhOAuth;
 	protected $session;
 	
 	/*
-	 this is normally 'oauth_verifier', but since we do not have control
-	 over the parameter name returned after authorization, we need to allow
+	 this is normally 'oauth_verifier', but we need to allow
 	 subclasses to override (thanks for sucking at standards, Facebook)
 	*/
 	protected $param_initiate_access_token = "oauth_verifier";
@@ -33,13 +31,12 @@ class DTSecureConsumer extends DTConsumer{
 		}
 	}
 
-	/** primary method of making a request to a DTSecureProvider and negotiating OAuth protocol */
+	/** request negotiating OAuth protocol if necessary */
 	public function request(array $params, $method='POST'){
 		if($this->accessToken()){ //we've got the access token, just make the request already!
 			$this->oauth->setToken($this->accessToken(),$this->accessTokenSecret());
 			$response = json_decode($this->sendRequestToProvider($params,$method),true);
-			if($response)
-				return $response["obj"];
+			return isset($response)?$response["obj"]:"";
 		}else{
 			if(isset($_REQUEST[$this->param_initiate_access_token])){ //session doesn't exist yet...
 				$this->oauthAccessToken();
@@ -50,24 +47,7 @@ class DTSecureConsumer extends DTConsumer{
 			}
 		}
 	}
-	
-	/** convenience method for making a request and returning the result as JSON */
-	public function requestAsJSON(array $params, $method='POST'){
-		$response = new DTResponse($this->request($params,$method));
-		$response->renderAsJSON();
-	}
-	
-	/** if the +async+ parameter is specified, returns a response suitable for client-side redirection */
-	protected function redirect($url){
-		if(isset($_REQUEST['async'])){
-			header('HTTP/1.1 278 Client Redirect', true, 278);
-			$response = new DTResponse(array("location"=>$url));
-			$response->renderAsJSON();
-		}else
-			header("Location: {$url}");
-		exit;
-	}
-	
+		
 	/** Request a temporary token */
 	function oauthRequestToken() {
 		$response = $this->oauth->getRequestToken($this->provider_url."/request_token?act=request_token");
@@ -75,10 +55,9 @@ class DTSecureConsumer extends DTConsumer{
 		$req_tok = $response["oauth_token"];
 		if(isset($response["login_url"]))
 			$this->session["oauth_login_url"] = $response["login_url"];
-		else{
+		else
 			exit("No login url returned.");
-		}
-		if(isset($_REQUEST['async']))//remember where we came from
+		if($this->async)//remember where we came from
 			$this->session["oauth_origin"] = isset($_SERVER["HTTP_REFERER"])?urlencode($_SERVER["HTTP_REFERER"]):""; 
 		else
 			$this->session["oauth_origin"] = isset($_SERVER["PHP_SELF"])?urlencode($_SERVER["PHP_SELF"]):"";

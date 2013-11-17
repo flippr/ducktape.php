@@ -21,8 +21,12 @@ class DTResponse{
 	
 	public function renderAsJSON(){
 		$response = array("err" => $this->err);
+		$response["obj"] = array();
 		if($this->obj instanceof DTModel)
 			$response["obj"] = $this->obj->publicProperties();
+		else if(is_array($this->obj))
+			foreach($this->obj as $o) //traverse list
+				$response["obj"][] = ($o instanceof DTModel)?$o->publicProperties():$o;
 		else
 			$response["obj"] = $this->obj;
 		$json = json_encode($response);

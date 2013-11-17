@@ -25,6 +25,7 @@ include_once($base_path."/modules/utilities/DTHTTPRequest.class.php");
 include_once($base_path."/modules/utilities/DTSettings.class.php");
 include_once($base_path."/modules/utilities/DTLog.class.php");
 include_once($base_path."/modules/utilities/DTLocation.class.php");
+include_once($base_path."/modules/utilities/DTParams.class.php");
 
 include_once($base_path."/modules/storage/DTQueryBuilder.class.php");
 include_once($base_path."/modules/storage/DTDatabase.class.php");

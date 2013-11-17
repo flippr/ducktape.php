@@ -2,58 +2,18 @@
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTProvider{
-	public $params = null;
+	protected $params = null;
 	public $session = null;
 	protected $response = null;
 	
 	function __construct($db=null){
 		$this->db = isset($db)?$db:DTSettings::$default_database;
-		$this->params = $_REQUEST;
+		$this->setParams($_REQUEST);
 		$this->response = new DTResponse();
 	}
 	
-//===================
-//! Parameter Parsing
-//===================
-/** @name Parameter Parsing
- *  Methods for parsing parameters into distinct types
- */
-///@{
-	public function param($name){
-		if(!isset($this->params[$name])){
-			//DTLog::warn("Attempt to access invalid parameter ({$name}). ".json_encode($this->params),1);
-			return null;
-		}
-		return $this->params[$name];
-	}
-
-	public function jsonParam($name){
-		return json_decode($this->param($name),true);
-	}
-	
-	public function intParam($name){
-		return intval($this->param($name));
-	}
-	
-	public function boolParam($name){
-		return ($this->param($name)==true);
-	}
-	
-	public function arrayParam($name){
-		$arr = $this->param($name);
-		if(!is_array($arr)) //if this isn't array, assume it is json encoded
-			$arr = json_decode($arr);
-		if(isset($this->db))
-			foreach($arr as $k=>$v) //clean all the array params
-				$arr[$k] = $this->db->clean($v);
-		return $arr;
-	}
-	
-	/**
-		@return returns a string param, cleaning it if +db+ is valid
-	*/
-	public function stringParam($name){
-		return isset($this->db)?$this->db->clean($this->param($name)):$this->param($name);
+	public function setParams(array $params){
+		$this->params = new DTParams($params,$this->db);
 	}
 	
 //==================
@@ -67,9 +27,9 @@ class DTProvider{
 		A convenience method for handling a standard request and sending a response
 	*/
 	public function handleRequest(){
-		$action = "action".preg_replace('/[^A-Z^a-z^0-9]+/','',$this->stringParam("act"));
+		$action = "action".preg_replace('/[^A-Z^a-z^0-9]+/','',$this->params->stringParam("act"));
 		$this->performAction($action);
-		switch($this->stringParam("fmt")){
+		switch($this->params->stringParam("fmt")){
 			default:
 				$this->response->renderAsJSON();
 		}
@@ -83,7 +43,7 @@ class DTProvider{
 	*/
 	protected function performAction($action=null){
 		$this->startSession();
-		$action = (isset($action)?$action:$this->stringParam("act"));
+		$action = (isset($action)?$action:$this->params->stringParam("act"));
 		try{
 			$meth = new ReflectionMethod($this,$action);
 			if(method_exists($this, $action) && $meth->isPublic()){
@@ -102,16 +62,16 @@ class DTProvider{
 		$this->response->setResponse($response);
 	}
 	
-	/**
-		@return returns null so that it may be chained with an action's return statement
-	*/
+	
 	public function responseCode(){
-		$this->response->error();
-		return null;
+		return $this->response->error();
+		
 	}
 	
+	/** @return returns null so that it may be chained with an action's return statement */
 	public function setResponseCode($code){
-		return $this->response->error($code);
+		$this->response->error($code);
+		return null;
 	}
 ///@}
 	
