@@ -34,7 +34,7 @@ END;
 	
 	public function testActionAuthenticate(){
 		$session = DTSession::sharedSession(); //start up a session
-		$this->provider->params = array("alias"=>"testuser","password"=>"testpass","oauth_token"=>"requesttoken");
+		$this->provider->setParams(array("alias"=>"testuser","password"=>"testpass","oauth_token"=>"requesttoken"));
 		$u = $this->provider->actionAuthenticate();
 		
 		$token = new DTOAuthToken($this->provider->db->where("token='requesttoken' AND type=0"));
@@ -43,7 +43,7 @@ END;
 	
 	public function testBadPassword(){
 		$session = DTSession::sharedSession(); //start up a session
-		$this->provider->params = array("alias"=>"testuser","password"=>"wrongpass","oauth_token"=>"requesttoken");
+		$this->provider->setParams(array("alias"=>"testuser","password"=>"wrongpass","oauth_token"=>"requesttoken"));
 		$u = $this->provider->actionAuthenticate();
 		
 		$token = new DTOAuthToken($this->provider->db->where("token='requesttoken' AND type=0"));

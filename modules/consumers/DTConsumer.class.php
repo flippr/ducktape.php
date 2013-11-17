@@ -29,6 +29,7 @@ class DTConsumer{
 	
 	/** if the +async+ parameter is specified, returns a response suitable for client-side redirection */
 	protected function redirect($url){
+		DTLog::debug($url);
 		if($this->async){
 			header('HTTP/1.1 278 Client Redirect', true, 278);
 			$response = new DTResponse(array("location"=>$url));

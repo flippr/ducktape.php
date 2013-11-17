@@ -25,8 +25,8 @@ class DTResponse{
 		if($this->obj instanceof DTModel)
 			$response["obj"] = $this->obj->publicProperties();
 		else if(is_array($this->obj))
-			foreach($this->obj as $o) //traverse list
-				$response["obj"][] = ($o instanceof DTModel)?$o->publicProperties():$o;
+			foreach($this->obj as $k=>$v) //traverse list
+				$response["obj"][$k] = ($v instanceof DTModel)?$v->publicProperties():$v;
 		else
 			$response["obj"] = $this->obj;
 		$json = json_encode($response);

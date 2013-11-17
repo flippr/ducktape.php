@@ -9,7 +9,7 @@ class DTSecureAuthenticationProvider extends DTAuthenticationProvider{
 		if(isset($u)){
 			try{ //update oauth token
 				$token = new DTOAuthToken($this->db->where("token='{$tok_str}' AND type=0"));
-				$token->authorize($this->db);
+				$token->authorize($this->db,$u["id"]);
 				
 				//redirect to verifier
 				$rows = $this->db->select("select verifier from consumers WHERE id='{$token["consumer_id"]}'");

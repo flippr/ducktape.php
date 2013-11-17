@@ -29,6 +29,12 @@ abstract class DTDatabase {
 	abstract public function clean($param);
 	/** @return returns an array with the results of a query */
 	abstract public function select($query);
+	
+	public function select1($query){
+		$rows = $this->select($query);
+		return (count($rows)>0?$rows[0]:null);
+	}
+	
 	/** @return returns an array of objects of type +class_name+ */
 	public function selectAs($query,$class_name){
 		$list = array();

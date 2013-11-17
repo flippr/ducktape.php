@@ -12,8 +12,8 @@ class DTSecureProvider extends DTProvider{
 	}
 	
 	protected function startSession(){
-		if(isset($this->provider->secret))
-			session_id($this->provider->secret);
+		if(isset($this->provider->token_secret))
+			session_id($this->provider->token_secret);
 		parent::startSession();
 	}
 
@@ -27,7 +27,7 @@ class DTSecureProvider extends DTProvider{
 			$this->provider->checkOAuthRequest();
 		} catch (OAuthException $E) {
 			$action = $this->params->stringParam("act");
-			DTLog::warn("Could not complete OAuth request ({$action}).");
+			DTLog::warn("Could not complete OAuth request ({$action}):".$E->getMessage());
 			return $this->setResponseCode(DT_ERR_PROHIBITED_ACTION); //we need to fail out
 		}
 		parent::handleRequest(); //very well, carry on

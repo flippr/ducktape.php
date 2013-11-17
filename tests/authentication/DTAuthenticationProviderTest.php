@@ -24,7 +24,7 @@ END;
 	
 	public function testActionAuthenticate(){
 		$session = DTSession::sharedSession(); //start up a session
-		$this->provider->params = array("alias"=>"testuser","password"=>"testpass");
+		$this->provider->setParams(array("alias"=>"testuser","password"=>"testpass"));
 		$u = $this->provider->actionAuthenticate();
 		$this->assertNotNull($u,"failed to authenticate testuser.");
 		$this->assertEquals($u["id"], $session["dt_user_id"]);
@@ -32,7 +32,7 @@ END;
 	
 	public function testBadPassword(){
 		$session = DTSession::sharedSession(); //start up a session
-		$this->provider->params = array("alias"=>"testuser","password"=>"wrongpass");
+		$this->provider->setParams(array("alias"=>"testuser","password"=>"wrongpass"));
 		$u = $this->provider->actionAuthenticate();
 		$this->assertNull($u,"failed to deny authentication.");
 		$this->assertFalse(isset($session["dt_user_id"]));
@@ -40,7 +40,7 @@ END;
 	
 	public function testNonUser(){
 		$session = DTSession::sharedSession(); //start up a session
-		$this->provider->params = array("alias"=>"notauser","password"=>"doesntmatter");
+		$this->provider->setParams(array("alias"=>"notauser","password"=>"doesntmatter"));
 		$u = $this->provider->actionAuthenticate();
 		$this->assertNull($u,"failed to deny non-user");
 		$this->assertFalse(isset($session["dt_user_id"]));

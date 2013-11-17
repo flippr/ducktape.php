@@ -10,8 +10,9 @@ class DTOAuthToken extends DTModel{
 	protected $token;
 	protected $secret;
 	protected $consumer_id;
+	protected $user_id;
 
-	public function __construct($paramsOrQuery=null){
+	public function __construct($paramsOrQuery=array()){
 		if(!$paramsOrQuery instanceof DTQueryBuilder) //new tokens have a token and secret generated randomly
 			$paramsOrQuery = array_merge($paramsOrQuery,array("token"=>static::generateToken(),"secret"=>static::generateToken()));
 		parent::__construct($paramsOrQuery);
@@ -29,8 +30,9 @@ class DTOAuthToken extends DTModel{
 		return md5(rand()).md5(rand());
 	}
 	
-	public function authorize($db){
+	public function authorize($db,$user_id){
 		$this["status"] = 1;
+		$this["user_id"] = $user_id;
 		$this->update($db);
 	}
 }

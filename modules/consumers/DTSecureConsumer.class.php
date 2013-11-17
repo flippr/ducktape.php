@@ -11,9 +11,11 @@ class DTSecureConsumer extends DTConsumer{
 	*/
 	protected $param_initiate_access_token = "oauth_verifier";
 	
-	function __construct($provider_url,$consumer_key,$consumer_secret){
+	function __construct($provider_url,$oauth_api){
 		parent::__construct($provider_url);
-		$this->oauth = new OAuth($consumer_key,$consumer_secret);
+		$oauth_settings = DTSettings::oauth();
+		$api = $oauth_settings[$oauth_api];
+		$this->oauth = new OAuth($api["key"],$api["secret"]);
 		$this->session = DTSession::sharedSession();
 	}
 	
@@ -27,7 +29,7 @@ class DTSecureConsumer extends DTConsumer{
 		    $this->oauth->fetch($this->provider_url,$params,$mtd);
 		    return isset($params["callback"])?preg_replace("/^.*?\((.*)\)/","\\1",$this->oauth->getLastResponse()):$this->oauth->getLastResponse();
 		} catch(OAuthException $E) {
-		    DTLog::error("Response: ". json_encode($E) . "\n");
+		    DTLog::error("Failed to access ({$this->provider_url})");
 		}
 	}
 
@@ -39,9 +41,11 @@ class DTSecureConsumer extends DTConsumer{
 			return isset($response)?$response["obj"]:"";
 		}else{
 			if(isset($_REQUEST[$this->param_initiate_access_token])){ //session doesn't exist yet...
+				DTLog::debug("Step 2: access token");
 				$this->oauthAccessToken();
 				$this->redirect(urldecode($this->session["oauth_origin"]));
 			}else{ //we're just getting started, send us to the login page with a request token
+				DTLog::debug("Step 1: request token");
 				$this->oauthRequestToken();
 				$this->redirect("{$this->session["oauth_login_url"]}?oauth_token=".$this->requestToken());
 			}
