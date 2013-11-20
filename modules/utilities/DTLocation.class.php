@@ -2,7 +2,7 @@
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTLocation{
-	public static function locationForString($str,$provider){
+	public static function locationForString($str){
 		$location = null;
 		$url = "http://maps.googleapis.com/maps/api/geocode/json?sensor=true";
 		$geocoded = json_decode(DTHTTPRequest::makeGETRequest($url,array("address"=>$str)));

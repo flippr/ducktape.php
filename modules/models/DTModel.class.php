@@ -124,7 +124,7 @@ class DTModel implements arrayaccess {
 			if($purpose!="insert"||$k!="id") //don't try to insert the id, assume it's autoincrementing
 				$storage_params[$k] = $this[$k];
 		}
-		return array_merge($storage_params,$defaults);
+		return array_merge($defaults,$storage_params);
 	}
 	
 	/** attempts to set each property as defined in +params+ (but never merges id property) */

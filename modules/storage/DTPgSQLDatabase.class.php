@@ -23,7 +23,8 @@ class DTPgSQLDatabase extends DTDatabase{
 	}
 	
 	public function query($query){
-		@pg_query($this->conn,$query);
+		if(@pg_query($this->conn,$query)===false)
+			DTLog::error("Failed query: ".pg_last_error());
 	}
 	
 	public function clean($param){
@@ -36,11 +37,9 @@ class DTPgSQLDatabase extends DTDatabase{
 	
 	public function last_insert_id(){
 		$query = "SELECT LASTVAL() as id";
-		$rows = $this->query($query); //get the id
-		if(!$rows)
-			return 0;
-		$row = $rows[0];
-		return $row["id"];
+		$rows = $this->select($query); //get the id
+		if(count($rows)==0) return 0;
+		return $rows[0]["id"];
 	}
 	
 	public function insert($query){
@@ -55,7 +54,8 @@ class DTPgSQLDatabase extends DTDatabase{
 	}
 	
 	public function execute($stmt,$params=array(),$fmt=null){
-		@pg_execute($this->conn,$stmt,$params);
+		if(@pg_execute($this->conn,$stmt,$params)===false)
+			throw new Exception("Failed to insert: ".pg_last_error());
 	}
 	
 	public function execute_insert($name,$params){
@@ -64,12 +64,7 @@ class DTPgSQLDatabase extends DTDatabase{
 	}
 	
 	public function columnsForTable($table){
-		$stmt = "select column_name from information_schema.columns where
-table_name='{$table}'";
-		return array_reduce(
-		  $this->select($stmt),
-		  function($rV,$cV) { $rV[]=$cV['column_name']; return $rV; },
-		  array()
-		);
+		return array_reduce( $this->select("select column_name from information_schema.columns where table_name='{$table}'"),
+			function($rV,$cV) { $rV[]=$cV['column_name']; return $rV; },array());
 	}
 }

@@ -63,4 +63,8 @@ class DTMySQLDatabase extends DTDatabase{
 	public function columnsForTable($table){
 		return null;
 	}
+	
+	public function typesForTable($table){
+		return null;
+	}
 }

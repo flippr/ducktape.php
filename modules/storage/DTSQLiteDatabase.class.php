@@ -55,10 +55,7 @@ class DTSQLiteDatabase extends DTDatabase{
 	}
 	
 	public function columnsForTable($table){
-		return array_reduce(
-		  $this->select("PRAGMA table_info(`{$table}`)"),
-		  function($rV,$cV) { $rV[]=$cV['name']; return $rV; },
-		  array()
-		);
+		return array_reduce($this->select("PRAGMA table_info(`{$table}`)"),
+			function($rV,$cV) { $rV[]=$cV['name']; return $rV; },array());
 	}
 }

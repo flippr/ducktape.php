@@ -54,5 +54,6 @@ abstract class DTDatabase {
 	/** @return returns the id of the new row */
 	abstract public function insert($query);
 	
+	/** @return returns an array of name=>type pairs */
 	abstract public function columnsForTable($table);
 }

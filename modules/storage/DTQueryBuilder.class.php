@@ -51,18 +51,29 @@ class DTQueryBuilder{
 	}
 	
 	public function update(array $properties){
-		$set_str = implode(",",array_map(function($k,$v){return ($v==="NULL"||!isset($v))?"{$k}=NULL":"{$k}='{$v}'";},array_keys($properties),$properties));
-		$stmt = "UPDATE {$this->from_clause} SET {$set_str} WHERE {$this->where_clause}";
-		return $this->db->query($stmt);
+		if(count($properties)>0){
+			$set_str = implode(",",array_map(function($k,$v) {return "{$k}=".DTQueryBuilder::formatValue($v);},array_keys($properties),$properties));
+			$stmt = "UPDATE {$this->from_clause} SET {$set_str} WHERE {$this->where_clause}";
+			return $this->db->query($stmt);
+		}
+		return false;
 	}
 	
 	public function insert($properties){
 		if(count($properties)>0){
 			$cols_str = implode(",",array_keys($properties));
-			$vals_str = implode(",",array_map(function($v){return ($v==="NULL"||!isset($v))?"NULL":"'{$v}'";},array_values($properties)));
+			$vals_str = implode(",",array_map(function($v){return DTQueryBuilder::formatValue($v);},array_values($properties)));
 			$stmt = "INSERT INTO {$this->from_clause} ({$cols_str}) VALUES ({$vals_str});";
 			return  $this->db->insert($stmt);
 		}
 		return false;
+	}
+	
+	public static function formatValue($v){
+		if(!isset($v)||$v==="NULL")
+			return "NULL";
+		else if(substr($v,0,11)=="\\DTSQLEXPR\\") //handle expressions as literals
+			return substr($v,11);
+		return "'{$v}'";
 	}
 }
