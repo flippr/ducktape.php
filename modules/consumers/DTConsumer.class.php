@@ -14,26 +14,37 @@ class DTConsumer{
 	public function request(array $params, $method='POST'){
 		$r = DTHTTPRequest::makeHTTPRequest($this->provider_url,$params,$method);
 		if($r && $r->getResponseCode()==200){
-			$response = isset($params["callback"])?preg_replace("/^.*?\((.*)\)/","\\1",$r->getResponseBody()):$r->getResponseBody();
-			$response = json_decode($response,true);
-			return isset($response)?$response["obj"]:"";
+			return $this->formatResponse($params,$r->getResponseBody());
+		}else{
+			DTLog::error("Failed to access provider ({$this->provider_url}).");		
 		}
 		return null;
 	}
 	
-	/** convenience method for making a request and returning the result as JSON */
-	public function requestAsJSON(array $params, $method='POST'){
+	public function formatResponse($params,$response){
+		$response = isset($params["callback"])?preg_replace("/^.*?\(\s*(.*?)\s*\)/","\\1",$response):$response;
+		$fmt = isset($params["fmt"])?$params["fmt"]:"dtr";
+		switch($fmt){
+			case "json":
+				return json_decode($response,true);
+			default:
+				$response = json_decode($response,true);
+				return isset($response)?$response["obj"]:"";
+		}
+	}
+	
+	public function requestAndRespond(array $params, $method='POST'){
 		$response = new DTResponse($this->request($params,$method));
-		$response->renderAsJSON();
+		$response->respond($params);
+		return $response;
 	}
 	
 	/** if the +async+ parameter is specified, returns a response suitable for client-side redirection */
 	protected function redirect($url){
-		DTLog::debug($url);
 		if($this->async){
 			header('HTTP/1.1 278 Client Redirect', true, 278);
 			$response = new DTResponse(array("location"=>$url));
-			$response->renderAsJSON();
+			$response->renderAsDTR();
 		}else
 			header("Location: {$url}");
 		exit;
@@ -47,7 +58,7 @@ class DTConsumer{
 		if($key!=static::apiKey($variant)){
 			$response = new DTResponse();
 			$response->setResponseCode(DT_ERR_INVALID_KEY);
-			$response->renderAsJSON();
+			$response->renderAsDTR();
 			exit();
 		}
 	}

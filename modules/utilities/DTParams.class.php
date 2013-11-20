@@ -11,9 +11,9 @@ class DTParams{
 		$this->db = $db;
 	}
 	
-//===================
-//! Parameter Parsing
-//===================
+//======================
+//! Parameter Handling
+//======================
 /** @name Parameter Parsing
  *  Methods for parsing parameters into distinct types
  */
@@ -31,7 +31,7 @@ class DTParams{
 	}
 	
 	public function boolParam($name,$default=null){
-		return ($this->param($name,$default=null)==true);
+		return static::parseBool($this->param($name,$default=null));
 	}
 	
 	public function arrayParam($name,$default=null){
@@ -49,4 +49,31 @@ class DTParams{
 		return isset($this->db)?$this->db->clean($this->param($name,$default)):$this->param($name,$default);
 	}
 	
+	public function allParams(array $defaults=array()){
+		return array_merge($defaults,$this->params);
+	}
+	
+//====================
+//! Parse Methods
+//====================
+	public static function parseBool($val){
+		if(is_bool($val)) return $val;
+		if(is_string($val)) $val = trim(strtolower($val));
+		switch($val){
+			case "true":
+			case "t":
+			case "yes":
+			case "y":
+			case "on":
+				return true;
+			case "false":
+			case "f":
+			case "no":
+			case "n":
+			case "off":
+				return false;
+		}
+		return null;
+	}
+
 }

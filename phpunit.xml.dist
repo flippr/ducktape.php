@@ -1,0 +1,4 @@
+<phpunit
+	bootstrap="tests/bootstrap.php.dist"
+>
+</phpunit>

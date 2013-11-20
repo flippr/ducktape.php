@@ -18,16 +18,19 @@ class DTModel implements arrayaccess {
     	@param paramsOrQuery - an assoc. array of default properties or DTQueryBuilder object
     */
     function __construct($paramsOrQuery=null){
-   		if(!isset($paramsOrQuery))
-    		return; //just create an empty object
+   		if(!isset($paramsOrQuery)) return; //just create an empty object
 		if(is_array($paramsOrQuery)){
 			$properties = $paramsOrQuery;
     	}else if($paramsOrQuery instanceof DTQueryBuilder){ //grab the parameters from storage
-    		$this->_bypass_accessors = true; //we want direct access to properties
+    		$this->_bypass_accessors = true; //we want direct access to properties by default
     		if(isset(static::$storage_table))
 	    		$properties = $paramsOrQuery->from(static::$storage_table)->select1();
 	    	if(!isset($properties))
     			throw new Exception('Failed to find object in storage.',1);
+    	}
+    	if(!isset($properties)){
+    		DTLog::error("Invalid parameters used to construct DTModel (".json_encode($paramsOrQuery).")");
+    		throw new Exception("Invalid parameters for DTModel constructor.");
     	}
 		if(is_array($properties) && (count($properties)==0 || count(array_filter(array_keys($properties),'is_string')))) // must be an associative array
 			foreach($properties as $k=>$v)
@@ -124,11 +127,20 @@ class DTModel implements arrayaccess {
 		return array_merge($storage_params,$defaults);
 	}
 	
+	/** attempts to set each property as defined in +params+ (but never merges id property) */
+	public function merge(array $params){
+		foreach($params as $k=>$v){
+			if($k!="id")
+				$this[$k] = $v;
+		}
+	}
+	
 	/**
 		convenience method for basic inserts based on storageProperties()
 		@return returns the inserted id, or false if nothing was inserted
 	*/
-	public function insert(DTDatabase $db){
+	public function insert(DTDatabase $db=null){
+		if(!isset($db)) $db = DTSettings::$default_database;
 		$qb = new DTQueryBuilder($db);
 		return $qb->from(static::$storage_table)->insert($this->storageProperties($db,array(),"insert"));
 	}
@@ -137,7 +149,8 @@ class DTModel implements arrayaccess {
 		convenience method for basic updates based on storageProperties()
 		@note uses the object's id property for where-clause
 	*/
-	public function update(DTDatabase $db){
+	public function update(DTDatabase $db=null){
+		if(!isset($db)) $db = DTSettings::$default_database;
 		$properties = $this->storageProperties($db,array(),"update");
 		return $db->where("id={$this->id}")->from(static::$storage_table)->update($properties);
 	}

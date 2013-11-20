@@ -22,22 +22,40 @@ class DTSecureAuthenticationProviderTest extends DTTestCase{
 			type int default 0,
 			status int default 0,
 			token text,
-			secret text
+			secret text,
+			consumer_id int,
+			user_id int
+		);
+		
+		CREATE TABLE consumers (
+			id integer,
+			name text,
+			verifier text,
+			consumer_key text,
+			secret text,
+			status int
 		);
 		
 		INSERT INTO users (alias, password) VALUES ('testuser','{$encrypted}');
 		
-		INSERT INTO tokens (type,status,token,secret) VALUES (0,0,'requesttoken','requestsecret');
+		INSERT INTO tokens (type,status,token,secret,consumer_id) VALUES (0,0,'requesttoken','requestsecret',1);
+		
+		INSERT INTO consumers (id,name,verifier,consumer_key,secret,status)
+			VALUES (1,'validconsumer','verifier.php','consumerkey','consumersecret',1);
 END;
-		$this->provider = new DTAuthenticationProvider($this->initDB($init_sql));
+		$this->provider = new DTSecureAuthenticationProvider($this->initDB($init_sql));
 	}
 	
 	public function testActionAuthenticate(){
 		$session = DTSession::sharedSession(); //start up a session
 		$this->provider->setParams(array("alias"=>"testuser","password"=>"testpass","oauth_token"=>"requesttoken"));
 		$u = $this->provider->actionAuthenticate();
-		
-		$token = new DTOAuthToken($this->provider->db->where("token='requesttoken' AND type=0"));
+		$this->assertInstanceOf("DTUser",$u);
+	
+		try{
+			$token = new DTOAuthToken($this->provider->db->where("token='requesttoken' AND type=0"));
+		}catch(Exception $e){}
+		$this->assertNotNull($token);
 		$this->assertEquals(1,$token["status"]);
 	}
 	

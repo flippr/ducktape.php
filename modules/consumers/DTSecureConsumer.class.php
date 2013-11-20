@@ -27,7 +27,7 @@ class DTSecureConsumer extends DTConsumer{
 		$mtd = (strtolower($method)=="get"?OAUTH_HTTP_METHOD_GET:OAUTH_HTTP_METHOD_POST);
 		try {
 		    $this->oauth->fetch($this->provider_url,$params,$mtd);
-		    return isset($params["callback"])?preg_replace("/^.*?\((.*)\)/","\\1",$this->oauth->getLastResponse()):$this->oauth->getLastResponse();
+		    return $this->oauth->getLastResponse();
 		} catch(OAuthException $E) {
 		    DTLog::error("Failed to access ({$this->provider_url})");
 		}
@@ -37,15 +37,14 @@ class DTSecureConsumer extends DTConsumer{
 	public function request(array $params, $method='POST'){
 		if($this->accessToken()){ //we've got the access token, just make the request already!
 			$this->oauth->setToken($this->accessToken(),$this->accessTokenSecret());
-			$response = json_decode($this->sendRequestToProvider($params,$method),true);
-			return isset($response)?$response["obj"]:"";
+			return $this->formatResponse($params,$this->sendRequestToProvider($params,$method));
 		}else{
 			if(isset($_REQUEST[$this->param_initiate_access_token])){ //session doesn't exist yet...
-				DTLog::debug("Step 2: access token");
+				//DTLog::debug("Step 2: access token");
 				$this->oauthAccessToken();
 				$this->redirect(urldecode($this->session["oauth_origin"]));
 			}else{ //we're just getting started, send us to the login page with a request token
-				DTLog::debug("Step 1: request token");
+				//DTLog::debug("Step 1: request token");
 				$this->oauthRequestToken();
 				$this->redirect("{$this->session["oauth_login_url"]}?oauth_token=".$this->requestToken());
 			}

@@ -18,6 +18,14 @@ class DTUser extends DTModel{
 		$this->password = $this->encryptPassword($password);
 	}
 	
+	public function setIsAdmin($val){
+		return null; //(readonly) admin rights cannot be set directly
+	}
+	
+	public function setIsActive($val){
+		return null; //(readonly) account cannot be activated/deactivated directly
+	}
+	
 	public function createdAt(){
 		return isset($this->created_at)?$this->created_at:date("Y-m-d H:i:s");
 	}
@@ -54,7 +62,7 @@ class DTUser extends DTModel{
 		@param salt_len - the length of the salt (maximum of 10), defaults to 5. For extra security, change this value.
 	*/
 	public function verifyPassword($given,$salt_len=5){
-		$encrypted = $this->password;
+		$encrypted = $this["password"];
 		$salt = substr($encrypted,-$salt_len);
 		$password = DTUser::encryptPassword($given,$salt);
 		return ($encrypted==$password);
@@ -62,5 +70,11 @@ class DTUser extends DTModel{
 	
 	public function isEqual(DTModel $o){
 		return ($this["alias"]==$o["alias"] && $this["password"]==$o["password"]);
+	}
+	
+	public function merge(array $params){
+		if(!isset($params["password"])||$params["password"]==""||$params["password"]!=$params["verify"])
+			unset($params["password"]); //don't set the password if it was left blank or is not verified
+		parent::merge($params);
 	}
 }

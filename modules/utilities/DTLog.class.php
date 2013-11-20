@@ -48,21 +48,21 @@ class DTLog{
 	}
 }
 
-$error_log = $base_path."/".DTSettings::$config["logs"]["path"].DTSettings::$config["logs"]["error_log"];
+$error_log = $dt_base."/".DTSettings::$config["logs"]["path"].DTSettings::$config["logs"]["error_log"];
 if(!file_exists($error_log)){
 	touch($error_log);
 	chmod($error_log,DTSettings::$config["logs"]["permissions"]);
 }
 DTLog::$error_fp = fopen($error_log,"a");
 
-$info_log = $base_path."/".DTSettings::$config["logs"]["path"].DTSettings::$config["logs"]["info_log"];
+$info_log = $dt_base."/".DTSettings::$config["logs"]["path"].DTSettings::$config["logs"]["info_log"];
 if(!file_exists($info_log)){
 	touch($info_log);
 	chmod($info_log,DTSettings::$config["logs"]["permissions"]);
 }
 DTLog::$info_fp = fopen($info_log,"a");
 
-$debug_log = $base_path."/".DTSettings::$config["logs"]["path"].DTSettings::$config["logs"]["debug_log"];
+$debug_log = $dt_base."/".DTSettings::$config["logs"]["path"].DTSettings::$config["logs"]["debug_log"];
 if(!file_exists($debug_log)){
 	touch($debug_log);
 	chmod($debug_log,DTSettings::$config["logs"]["permissions"]);

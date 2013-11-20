@@ -8,7 +8,7 @@ define("DT_ERR_PROHIBITED_ACTION",3);
 define("DT_ERR_UNAUTHORIZED_TOKEN",4);
 
 class DTResponse{
-	protected $obj;
+	public $obj;
 	protected $err = 0;
 	
 	function __construct($obj=null){
@@ -19,28 +19,55 @@ class DTResponse{
 		$this->obj = $obj;
 	}
 	
-	public function renderAsJSON(){
-		$response = array("err" => $this->err);
-		$response["obj"] = array();
-		if($this->obj instanceof DTModel)
-			$response["obj"] = $this->obj->publicProperties();
-		else if(is_array($this->obj))
-			foreach($this->obj as $k=>$v) //traverse list
-				$response["obj"][$k] = ($v instanceof DTModel)?$v->publicProperties():$v;
-		else
-			$response["obj"] = $this->obj;
-		$json = json_encode($response);
-		if(isset($_REQUEST["callback"])){ //handle jsonp
-			header("Content-Type:application/javascript");
-			$json = $_REQUEST["callback"]."( {$json} )";
-		}else
-			header('Content-Type: application/json; charset=utf-8');
-		echo $json;
-	}
-	
 	public function error($code=null){
 		if(isset($code))
 			$this->err = intval($code);
 		return $this->err;
+	}
+	
+	/** Converts the +obj+ to a form it can be rendered.
+		For DTModels, these are only the public properties. */
+	public static function objectAsRenderable($obj=null){
+		$renderable = array();
+		if($obj instanceof DTModel)
+			$renderable = $obj->publicProperties();
+		else if(is_array($obj))
+			foreach($obj as $k=>$v) //traverse list
+				$renderable[$k] = ($v instanceof DTModel)?$v->publicProperties():$v;
+		else
+			$renderable = $obj;
+		return $renderable;
+	}
+	
+//===================
+//! Rendering Methods
+//===================
+	public function renderAsDTR(){
+		$response = array("err" => $this->err,"obj"=>$this->objectAsRenderable($this->obj));
+		$this->render(json_encode($response));
+	}
+	
+	public function renderAsJSON(){
+		$this->render(json_encode($this->objectAsRenderable($this->obj)));
+	}
+	
+	public static function render($str){
+		if(isset($_REQUEST["callback"])){ //handle jsonp
+			header("Content-Type:application/javascript");
+			$str = $_REQUEST["callback"]."( {$str} )";
+		}else
+			header('Content-Type: application/json; charset=utf-8');
+		echo $str;
+	}
+	
+	public function respond(array $params=array()){
+		$fmt = isset($params["fmt"])?$params["fmt"]:"dtr";
+		switch($fmt){
+			case "json":
+				$this->renderAsJSON();
+				break;
+			default:
+				$this->renderAsDTR();
+		}
 	}
 }

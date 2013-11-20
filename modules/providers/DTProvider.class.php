@@ -29,10 +29,7 @@ class DTProvider{
 	public function handleRequest(){
 		$action = "action".preg_replace('/[^A-Z^a-z^0-9]+/','',$this->params->stringParam("act"));
 		$this->performAction($action);
-		switch($this->params->stringParam("fmt")){
-			default:
-				$this->response->renderAsJSON();
-		}
+		$this->response->respond($this->params->allParams());
 		$this->recordRequest();
 	}
 
@@ -50,7 +47,7 @@ class DTProvider{
 				$this->setResponse($this->$action());
 			}
 		}catch(Exception $e){
-			DTLog::warn("Action not found ({$action}).");
+			DTLog::warn("Action not found ({$action}): ".$e->getMessage());
 		}
 	}
 	

@@ -16,6 +16,23 @@ class DTSecureProvider extends DTProvider{
 			session_id($this->provider->token_secret);
 		parent::startSession();
 	}
+	
+	public function actionCurrentUser(){
+		return $this->currentUser($this->provider->token,$this->db);
+	}
+	
+	//** user is based on access token, not session values */
+	public static function currentUser($access_token,DTDatabase $db=null){
+		if(!isset($db)) $db = DTSettings::$default_database;
+		try{
+			$stmt = "SELECT user_id FROM tokens WHERE token='{$access_token}' AND type=1 AND status=0";
+			$row = $db->select1($stmt);
+			return new DTUser($db->where("id='{$row["user_id"]}'"));
+		}catch(Exception $e){
+			DTLog::error("Could not find current user.");
+		}
+		return null;
+	}
 
 	public function handleRequest(){
 		try {
@@ -30,6 +47,7 @@ class DTSecureProvider extends DTProvider{
 			DTLog::warn("Could not complete OAuth request ({$action}):".$E->getMessage());
 			return $this->setResponseCode(DT_ERR_PROHIBITED_ACTION); //we need to fail out
 		}
+		
 		parent::handleRequest(); //very well, carry on
 	}
 

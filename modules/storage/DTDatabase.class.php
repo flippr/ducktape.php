@@ -5,7 +5,7 @@ abstract class DTDatabase {
 	public $ilike = "LIKE"; //keyword for case-insensitive search
 	public $conn = null;
 
-	function __construct($database=null,$user=null,$password=null,$host=null){
+	function __construct($database=null,$user=null,$password=null,$host="localhost"){
 		if($database==null){
 			$host = DTSettings::$storage["default"]["host"];
 			$user = DTSettings::$storage["default"]["user"];

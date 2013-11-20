@@ -1,6 +1,5 @@
 <?php
 ini_set('display_errors', '1');
-
 require_once dirname(__FILE__)."/../ducktape.inc.php";
 
 define("DT_TEST_DB", "/tmp/dt.test.sqlite");
