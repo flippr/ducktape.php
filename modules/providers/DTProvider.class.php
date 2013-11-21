@@ -12,8 +12,31 @@ class DTProvider{
 		$this->response = new DTResponse();
 	}
 	
+	function actionSessionDestroy(){
+		DTSession::destroy();
+	}
+	
 	public function setParams(array $params){
 		$this->params = new DTParams($params,$this->db);
+	}
+	
+	public static function currentUser(DTDatabase $db=null){
+		if(!isset($db)) $db = DTSettings::$default_database;
+		$session = DTSession::sharedSession();
+		try{
+			return new DTUser($db->where("id='{$session["dt_user_id"]}'"));
+		}catch(Exception $e){
+			DTLog::error("Could not find current user.");
+		}
+		return null;
+	}
+	
+	/**
+	ensures that provider requests come from a known source (this token should never be public!)
+	@return returns a token to be included in reqests to providers
+	*/
+	public static function providerToken($consumer_key,$consumer_secret){
+		return substr(md5($consumer_secret.$consumer_key),0,10).$consumer_key;
 	}
 	
 //==================
@@ -28,9 +51,26 @@ class DTProvider{
 	*/
 	public function handleRequest(){
 		$action = "action".preg_replace('/[^A-Z^a-z^0-9]+/','',$this->params->stringParam("act"));
-		$this->performAction($action);
+		if($this->verifyRequest())
+			$this->performAction($action);
+		else
+			$this->setResponseCode(DT_ERR_PROHIBITED_ACTION);
 		$this->response->respond($this->params->allParams());
 		$this->recordRequest();
+	}
+	
+	public function verifyRequest(){
+		$token = $this->params->stringParam("tok");
+		$consumer_key = substr($token,10);
+	    $query = "SELECT * FROM consumers WHERE consumer_key='{$consumer_key}' AND status=1";
+	    $rows = $this->db->select($query);
+	    if(count($rows)>0){
+		    $row = $rows[0];
+		    if(static::providerToken($row["consumer_key"],$row["secret"])==$token)
+			    return true;
+		}
+		DTLog::error("Invalid request for consumer ({$consumer_key})");
+		return false;
 	}
 
 	/**

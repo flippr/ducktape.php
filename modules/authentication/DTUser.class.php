@@ -1,6 +1,9 @@
 <?php
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
+define ("DT_PASSWORD_CHARSET","abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789");
+define ("DT_SALT_CHARSET","abcdef0123456789");
+
 class DTUser extends DTModel{
 	protected static $strict_properties = true;
 	protected static $storage_table = "users";
@@ -27,7 +30,7 @@ class DTUser extends DTModel{
 	}
 	
 	public function createdAt(){
-		return isset($this->created_at)?$this->created_at:date("Y-m-d H:i:s");
+		return isset($this->created_at)?$this->created_at:gmdate("Y-m-d H:i:s");
 	}
 	
 	/**

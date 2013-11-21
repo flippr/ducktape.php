@@ -11,11 +11,11 @@ class DTSecureProvider extends DTProvider{
 		parent::__construct($db);
 	}
 	
-	protected function startSession(){
+	/*protected function startSession(){
 		if(isset($this->provider->token_secret))
 			session_id($this->provider->token_secret);
 		parent::startSession();
-	}
+	}*/
 	
 	public function actionCurrentUser(){
 		return $this->currentUser($this->provider->token,$this->db);
@@ -34,7 +34,7 @@ class DTSecureProvider extends DTProvider{
 		return null;
 	}
 
-	public function handleRequest(){
+	public function verifyRequest(){
 		try {
 			$this->provider = new OAuthProvider();
 			$this->provider->consumerHandler(array($this,'lookupConsumer'));	
@@ -45,10 +45,9 @@ class DTSecureProvider extends DTProvider{
 		} catch (OAuthException $E) {
 			$action = $this->params->stringParam("act");
 			DTLog::warn("Could not complete OAuth request ({$action}):".$E->getMessage());
-			return $this->setResponseCode(DT_ERR_PROHIBITED_ACTION); //we need to fail out
+			return false;
 		}
-		
-		parent::handleRequest(); //very well, carry on
+		return true; //@todo: this currently bypasses the requirement for consumer token--seems OK to me, since this is handled by OAuth
 	}
 
 	public function actionRequestToken(){
@@ -80,7 +79,7 @@ class DTSecureProvider extends DTProvider{
 	// checks the consumer key
 	public function lookupConsumer($provider) {
 		$consumer_key = $this->db->clean($provider->consumer_key);
-	    $query = "SELECT * FROM consumers WHERE consumer_key='{$consumer_key}'";
+	    $query = "SELECT * FROM consumers WHERE consumer_key='{$consumer_key}' AND status=1";
 	    $rows = $this->db->select($query);
 	    if(count($rows)==0) return OAUTH_CONSUMER_KEY_UNKNOWN;
 	    $row = $rows[0];

@@ -11,11 +11,9 @@ class DTSecureConsumer extends DTConsumer{
 	*/
 	protected $param_initiate_access_token = "oauth_verifier";
 	
-	function __construct($provider_url,$oauth_api){
-		parent::__construct($provider_url);
-		$oauth_settings = DTSettings::oauth();
-		$api = $oauth_settings[$oauth_api];
-		$this->oauth = new OAuth($api["key"],$api["secret"]);
+	function __construct($api_name,$provider_url){
+		parent::__construct($api_name,$provider_url);
+		$this->oauth = new OAuth($this->consumer_key,$this->consumer_secret);
 		$this->session = DTSession::sharedSession();
 	}
 	
@@ -34,7 +32,11 @@ class DTSecureConsumer extends DTConsumer{
 	}
 
 	/** request negotiating OAuth protocol if necessary */
-	public function request(array $params, $method='POST'){
+	public function request($action, array $params=array(), $provider_token=null, $method='POST'){
+		$params["act"] = $action;
+		if($provider_token==null && !$this->async )
+			$provider_token = DTProvider::providerToken($this->consumer_key,$this->consumer_secret);
+		$params["tok"] = $provider_token;
 		if($this->accessToken()){ //we've got the access token, just make the request already!
 			$this->oauth->setToken($this->accessToken(),$this->accessTokenSecret());
 			return $this->formatResponse($params,$this->sendRequestToProvider($params,$method));

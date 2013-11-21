@@ -8,7 +8,7 @@ class DTPgSQLDatabase extends DTDatabase{
 		$this->conn = @pg_connect("host={$host} dbname={$db} user={$user} password={$pass}");
 		if(!$this->conn)
 			DTLog::error("DTPgSQL:connect_error:host={$host} dbname={$db} user={$user}");
-		@pg_set_client_encoding($this->conn, "UNICODE");
+		@pg_set_client_encoding($this->conn, "UTF8");
 	}
 	
 	public function select($query){

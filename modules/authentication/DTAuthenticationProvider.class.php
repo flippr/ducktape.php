@@ -1,8 +1,21 @@
 <?php
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
-define ("DT_PASSWORD_CHARSET","abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789");
-define ("DT_SALT_CHARSET","abcdef0123456789");
+class DTResetToken extends DTModel{
+	protected static $storage_table = "reset_tokens";
+	public $token=null;
+	public $alias;
+	protected $expires_at;
+	protected $is_valid=1;
+	
+	public function token(){
+		return $this->token = isset($this->token)?$this->token:md5(rand()).md5(rand());
+	}
+	
+	public function expiresAt(){
+		return $this->expires_at = isset($this->expires_at)?$this->expires_at:gmdate("Y-m-d H:i:s",strtotime("1 day"));
+	}
+}
 
 class DTAuthenticationProvider extends DTProvider{
 	
@@ -35,16 +48,23 @@ class DTAuthenticationProvider extends DTProvider{
 		return null;
 	}
 	
-	//** session-based user identification */
-	/*public static function currentUser(DTDatabase $db=null){
-		if(!isset($db)) $db = DTSettings::$default_database;
-		$session = DTSession::sharedSession();
-		try{
-			return new DTUser($db->where("id='{$session["dt_user_id"]}'"));
-		}catch(Exception $e){
-			DTLog::error("Could not find current user.");
-		}
-		return null;
+	/*public function actionPasswordResetToken(){
+		$alias = $this->params->stringParam("alias");
+		
+		return new DTResetToken(array("alias"=>$alias));
+	}
+	
+	public function actionResetPassword(){
+		$token = $this->params->stringParam("token");
+		$t = new DTResetToken($this->db->where("token='{$token}' AND is_valid=1");
+		
+		$params = $this->params->allParams();
+		$u = new DTUser($this->db->where("alias='{$params["alias"]}' and is_active=1"));
+		$u->merge($params);
+		$u->update();
+		
+		$t["is_valid"]=0; //invalidate the token
+		$t->update();
 	}*/
 }
 ///@}
