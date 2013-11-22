@@ -21,6 +21,10 @@ class DTUser extends DTModel{
 		$this->password = $this->encryptPassword($password);
 	}
 	
+	public function password(){ // if there is no password yet, generate a random string
+		return isset($this->password)?$this->password:$this->generateString();
+	}
+	
 	public function setIsAdmin($val){
 		return null; //(readonly) admin rights cannot be set directly
 	}

@@ -18,6 +18,16 @@ class DTAuthenticationProviderTest extends DTTestCase{
 		);
 		
 		INSERT INTO users (alias, password) VALUES ('testuser','{$encrypted}');
+		
+		CREATE TABLE reset_tokens (
+			id integer NOT NULL primary key autoincrement,
+			token text,
+			alias text,
+			expires_at datetime,
+			is_valid integer default 1
+		);
+		
+		INSERT INTO reset_tokens (alias,token) VALUES ('testuser','testtoken');
 END;
 		$this->provider = new DTAuthenticationProvider($this->initDB($init_sql));
 	}
@@ -44,5 +54,25 @@ END;
 		$u = $this->provider->actionAuthenticate();
 		$this->assertNull($u,"failed to deny non-user");
 		$this->assertFalse(isset($session["dt_user_id"]));
+	}
+	
+	public function testActionPasswordResetToken(){
+		$this->provider->setParams(array("alias"=>"testuser"));
+		$token = $this->provider->actionPasswordResetToken();
+		$this->assertNotNull($token);
+		$this->assertTrue(strtotime($token["expires_at"])>time());
+		$this->assertTrue($token["is_valid"]==1);
+	}
+	
+	public function testResetPassword(){
+		$this->provider->setParams(array("alias"=>"testuser","rst"=>"testtoken","password"=>"newpass","verify"=>"newpass"));
+		$success=$this->provider->actionResetPassword();
+		$this->assertTrue($success);
+		
+		$t = new DTResetToken($this->provider->db->where("token='testtoken'"));
+		$this->assertEquals(0,$t["is_valid"]);
+		
+		$u = new DTUser($this->provider->db->where("alias='testuser'"));
+		$this->assertTrue($u->verifyPassword("newpass"));
 	}
 }

@@ -54,7 +54,8 @@ class DTQueryBuilder{
 		if(count($properties)>0){
 			$set_str = implode(",",array_map(function($k,$v) {return "{$k}=".DTQueryBuilder::formatValue($v);},array_keys($properties),$properties));
 			$stmt = "UPDATE {$this->from_clause} SET {$set_str} WHERE {$this->where_clause}";
-			return $this->db->query($stmt);
+			$this->db->query($stmt);
+			return true;
 		}
 		return false;
 	}
@@ -72,8 +73,8 @@ class DTQueryBuilder{
 	public static function formatValue($v){
 		if(!isset($v)||$v==="NULL")
 			return "NULL";
-		else if(substr($v,0,11)=="\\DTSQLEXPR\\") //handle expressions as literals
+		else if(substr($v,0,11)=="\\DTSQLEXPR\\") //handle expressions as literals, as long as params are cleaned, this should never be possible from users because of the unescaped backslash
 			return substr($v,11);
-		return "'{$v}'";
+		return "'{$v}'"; // ALWAYS quote other values to avoid 'id=1 OR 1=1' attacks
 	}
 }

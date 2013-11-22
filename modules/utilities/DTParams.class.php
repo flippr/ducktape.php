@@ -49,8 +49,13 @@ class DTParams{
 		return isset($this->db)?$this->db->clean($this->param($name,$default)):$this->param($name,$default);
 	}
 	
+	/** @return returns all parameters, using db cleaning */
 	public function allParams(array $defaults=array()){
-		return array_merge($defaults,$this->params);
+		$params = $defaults;
+		foreach($this->params as $k=>$v){
+			$params[$k] = $this->db->clean($v);
+		}
+		return $params;
 	}
 	
 //====================

@@ -9,7 +9,7 @@ class DTResetToken extends DTModel{
 	protected $is_valid=1;
 	
 	public function token(){
-		return $this->token = isset($this->token)?$this->token:md5(rand()).md5(rand());
+		return $this->token = isset($this->token)?$this->token:md5(rand());
 	}
 	
 	public function expiresAt(){
@@ -27,10 +27,9 @@ class DTAuthenticationProvider extends DTProvider{
  */
 ///@{
 	/**
-		authenticate a user
+		authenticate an active user
 		@param user - the username
 		@param pass - the password
-		@param key - the request validation string
 		@return returns a valid user object and sets the session variable +dt_user_id+, or null if authentication fails
 	*/
 	public function actionAuthenticate(){
@@ -48,23 +47,39 @@ class DTAuthenticationProvider extends DTProvider{
 		return null;
 	}
 	
-	/*public function actionPasswordResetToken(){
+	/**
+		request a password reset token (no session required)
+		@param alias - the user to request a reset for
+		@return returns a valid DTResetToken
+	*/
+	public function actionPasswordResetToken(){
 		$alias = $this->params->stringParam("alias");
-		
-		return new DTResetToken(array("alias"=>$alias));
+		$token = new DTResetToken(array("alias"=>$alias));
+		$token->insert($this->db);
+		return $token;
 	}
 	
+	/**
+		reset a password
+		@param alias - the user to reset password for
+	*/
 	public function actionResetPassword(){
-		$token = $this->params->stringParam("token");
-		$t = new DTResetToken($this->db->where("token='{$token}' AND is_valid=1");
+		$rst = $this->params->stringParam("rst");
+		$alias = $this->params->stringParam("alias");
+		try{
+			$t = new DTResetToken($this->db->where("token='{$rst}' AND alias='{$alias}' AND is_valid=1 AND expires_at > NOW()"));
+			$t["is_valid"]=0; //invalidate the token
+			$t->update($this->db);
 		
-		$params = $this->params->allParams();
-		$u = new DTUser($this->db->where("alias='{$params["alias"]}' and is_active=1"));
-		$u->merge($params);
-		$u->update();
-		
-		$t["is_valid"]=0; //invalidate the token
-		$t->update();
-	}*/
+			$params = $this->params->allParams();
+			$u = new DTUser($this->db->where("alias='{$alias}' and is_active=1"));
+			$u->merge($params);
+			$u->update($this->db);
+		}catch(Exception $e){
+			DTLog::error("Failed to reset password:".$e->getMessage());
+			return false;
+		}
+		return true;
+	}
 }
 ///@}

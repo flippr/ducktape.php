@@ -5,9 +5,8 @@
 	The default directory for settings is 'ducktape/../local'. The idea behind this location is to keep the local settings outside of the source repository (without relying on .gitignore).
 */
 
-if (version_compare(PHP_VERSION, '5.3') < 0) {
+if (version_compare(PHP_VERSION, '5.3') < 0) 
     die ('DuckTape requires PHP version 5.3 or higher.');
-}
 
 //3rd party libs
 require_once dirname(__FILE__).'/lib/gisconverter.php/gisconverter.php';

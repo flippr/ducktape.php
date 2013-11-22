@@ -26,7 +26,7 @@ class DTModel implements arrayaccess {
     		if(isset(static::$storage_table))
 	    		$properties = $paramsOrQuery->from(static::$storage_table)->select1();
 	    	if(!isset($properties))
-    			throw new Exception('Failed to find object in storage.',1);
+    			throw new Exception("Failed to find ".get_called_class()." in storage.",1);
     	}
     	if(!isset($properties)){
     		DTLog::error("Invalid parameters used to construct DTModel (".json_encode($paramsOrQuery).")");
@@ -142,7 +142,9 @@ class DTModel implements arrayaccess {
 	public function insert(DTDatabase $db=null){
 		if(!isset($db)) $db = DTSettings::$default_database;
 		$qb = new DTQueryBuilder($db);
-		return $qb->from(static::$storage_table)->insert($this->storageProperties($db,array(),"insert"));
+		$new_id = $qb->from(static::$storage_table)->insert($this->storageProperties($db,array(),"insert"));
+		$this->id = $new_id;
+		return $new_id;
 	}
 	
 	/**
