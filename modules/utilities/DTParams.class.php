@@ -36,8 +36,11 @@ class DTParams{
 	
 	public function arrayParam($name,$default=null){
 		$arr = $this->param($name,$default);
-		if(!is_array($arr)) //if this isn't array, assume it is json encoded
+		if(!is_array($arr)){ //if this isn't array, assume it is json encoded or single value
 			$arr = json_decode($arr);
+			if(!is_array($arr)) //must have been a single value
+				$arr = array($arr);
+		}
 		if(isset($this->db))
 			foreach($arr as $k=>$v) //clean all the array params
 				$arr[$k] = $this->db->clean($v);

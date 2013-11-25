@@ -16,7 +16,7 @@ class DTHTTPRequest{
 	@todo fix cookie handling (only vaguely remember why this was required... something about multiple requests in quick succession)
 	@return returns the HTTPRequest response object
 */
-	public static function makeHTTPRequest($url,$params=array(),$method="GET",$cookies=array()){
+	public static function makeHTTPRequest($url,$params=array(),$method="GET",&$cookies=array()){
 		$r = new HttpRequest($url);
 	
 		if($method=="POST"){
@@ -31,6 +31,9 @@ class DTHTTPRequest{
 		$r->addCookies($cookies);
 		try {
 		    $r->send();
+		    $new_cookies = $r->getResponseCookies();
+		    if(isset($new_cookies[0]))
+		    	$cookies = $new_cookies[0]->cookies;
 		    return $r;
 		} catch (HttpException $ex) {
 		    DTLog::error($ex->getMessage());

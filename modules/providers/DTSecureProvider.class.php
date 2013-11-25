@@ -18,11 +18,11 @@ class DTSecureProvider extends DTProvider{
 	}*/
 	
 	public function actionCurrentUser(){
-		return $this->currentUser($this->provider->token,$this->db);
+		return $this->currentUser($this->db,$this->provider->token);
 	}
 	
 	//** user is based on access token, not session values */
-	public static function currentUser($access_token,DTDatabase $db=null){
+	public static function currentUser(DTDatabase $db=null,$access_token){
 		if(!isset($db)) $db = DTSettings::$default_database;
 		try{
 			$stmt = "SELECT user_id FROM tokens WHERE token='{$access_token}' AND type=1 AND status=0";
@@ -34,7 +34,7 @@ class DTSecureProvider extends DTProvider{
 		return null;
 	}
 
-	public function verifyRequest(){
+	public function verifyRequest($action){
 		try {
 			$this->provider = new OAuthProvider();
 			$this->provider->consumerHandler(array($this,'lookupConsumer'));	
@@ -43,11 +43,17 @@ class DTSecureProvider extends DTProvider{
 			$this->provider->setRequestTokenPath(dirname($_SERVER["PHP_SELF"])."/request_token"); // No auth_token needed for this end point -- this is critical to get things working!
 			$this->provider->checkOAuthRequest();
 		} catch (OAuthException $E) {
-			$action = $this->params->stringParam("act");
 			DTLog::warn("Could not complete OAuth request ({$action}):".$E->getMessage());
 			return false;
 		}
 		return true; //@todo: this currently bypasses the requirement for consumer token--seems OK to me, since this is handled by OAuth
+	}
+	
+	protected function redirect($url){
+		header('HTTP/1.1 278 Client Redirect', true, 278);
+		$response = new DTResponse(array("location"=>$url));
+		$response->respond();
+		exit;
 	}
 
 	public function actionRequestToken(){

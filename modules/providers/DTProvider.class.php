@@ -24,7 +24,9 @@ class DTProvider{
 		if(!isset($db)) $db = DTSettings::$default_database;
 		$session = DTSession::sharedSession();
 		try{
-			return new DTUser($db->where("id='{$session["dt_user_id"]}'"));
+			$uid = $session["dt_user_id"];
+			if(isset($uid))
+				return new DTUser($db->where("id='{$uid}'"));
 		}catch(Exception $e){
 			DTLog::error("Could not find current user.");
 		}
@@ -51,7 +53,7 @@ class DTProvider{
 	*/
 	public function handleRequest(){
 		$action = "action".preg_replace('/[^A-Z^a-z^0-9]+/','',$this->params->stringParam("act"));
-		if($this->verifyRequest())
+		if($this->verifyRequest($action))
 			$this->performAction($action);
 		else
 			$this->setResponseCode(DT_ERR_PROHIBITED_ACTION);
@@ -59,7 +61,7 @@ class DTProvider{
 		$this->recordRequest();
 	}
 	
-	public function verifyRequest(){
+	public function verifyRequest($action){
 		$token = $this->params->stringParam("tok");
 		$consumer_key = substr($token,10);
 	    $query = "SELECT * FROM consumers WHERE consumer_key='{$consumer_key}' AND status=1";
@@ -69,7 +71,7 @@ class DTProvider{
 		    if(static::providerToken($row["consumer_key"],$row["secret"])==$token)
 			    return true;
 		}
-		DTLog::error("Invalid request for consumer ({$consumer_key})");
+		DTLog::error("Invalid request for consumer ({$action})");
 		return false;
 	}
 

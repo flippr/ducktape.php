@@ -67,7 +67,8 @@ class DTAuthenticationProvider extends DTProvider{
 		$rst = $this->params->stringParam("rst");
 		$alias = $this->params->stringParam("alias");
 		try{
-			$t = new DTResetToken($this->db->where("token='{$rst}' AND alias='{$alias}' AND is_valid=1 AND expires_at > NOW()"));
+			$date = gmdate("Y-m-d H:i:s");
+			$t = new DTResetToken($this->db->where("token='{$rst}' AND alias='{$alias}' AND is_valid=1 AND expires_at > '{$date}'"));
 			$t["is_valid"]=0; //invalidate the token
 			$t->update($this->db);
 		

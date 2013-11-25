@@ -65,14 +65,17 @@ END;
 	}
 	
 	public function testResetPassword(){
-		$this->provider->setParams(array("alias"=>"testuser","rst"=>"testtoken","password"=>"newpass","verify"=>"newpass"));
+		$this->provider->setParams(array("alias"=>"testuser"));
+		$token = $this->provider->actionPasswordResetToken();
+	
+		$this->provider->setParams(array("alias"=>$token["alias"],"rst"=>$token["token"],"password"=>"newpass","verify"=>"newpass"));
 		$success=$this->provider->actionResetPassword();
 		$this->assertTrue($success);
 		
-		$t = new DTResetToken($this->provider->db->where("token='testtoken'"));
+		$t = new DTResetToken($this->provider->db->where("token='{$token["token"]}'"));
 		$this->assertEquals(0,$t["is_valid"]);
 		
-		$u = new DTUser($this->provider->db->where("alias='testuser'"));
+		$u = new DTUser($this->provider->db->where("alias='{$token["alias"]}'"));
 		$this->assertTrue($u->verifyPassword("newpass"));
 	}
 }
