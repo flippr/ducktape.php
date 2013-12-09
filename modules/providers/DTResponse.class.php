@@ -33,9 +33,9 @@ class DTResponse{
 			$renderable = $obj->publicProperties();
 		else if(is_array($obj))
 			foreach($obj as $k=>$v) //traverse list
-				$renderable[$k] = ($v instanceof DTModel)?$v->publicProperties():$v;
+				$renderable[$k] = static::objectAsRenderable($v);
 		else
-			$renderable = $obj;
+			$renderable = (string)$obj;
 		return $renderable;
 	}
 	

@@ -8,6 +8,7 @@ class DTModel implements arrayaccess {
 	/** require properties to be defined in the class, defaults to false */
 	protected static $strict_properties = false;
 	protected static $storage_table = null;
+	public $db = null;
 	
 	public $id = 0;
 
@@ -23,6 +24,7 @@ class DTModel implements arrayaccess {
 			$properties = $paramsOrQuery;
     	}else if($paramsOrQuery instanceof DTQueryBuilder){ //grab the parameters from storage
     		$this->_bypass_accessors = true; //we want direct access to properties by default
+    		$this->db = $paramsOrQuery->db; //keep track of the database we came from
     		if(isset(static::$storage_table))
 	    		$properties = $paramsOrQuery->from(static::$storage_table)->select1();
 	    	if(!isset($properties))
@@ -95,6 +97,14 @@ class DTModel implements arrayaccess {
 	    return $this==$obj;
     }
     
+    /** attempts to access +property+ directly (does not work with accessors), assigning value of +f+ if not found */
+    protected function selfOr(&$property,callable $f){
+		return $property =
+		isset($property)
+		? $property
+		: call_user_func($f);
+	}
+    
 //==================
 //! Storage Methods
 //==================
@@ -110,7 +120,7 @@ class DTModel implements arrayaccess {
 		$publics = $ref->getProperties(ReflectionProperty::IS_PUBLIC);
 		foreach($publics as $p){
 			$k = $p->getName();
-			$public_params[$k] = $this[$k];
+			$public_params[$k] = DTResponse::objectAsRenderable($this[$k]); //recursively get renderables
 		}
 		return array_merge($public_params,$defaults);
 	}
@@ -155,6 +165,24 @@ class DTModel implements arrayaccess {
 		if(!isset($db)) $db = DTSettings::$default_database;
 		$properties = $this->storageProperties($db,array(),"update");
 		return $db->where("id={$this->id}")->from(static::$storage_table)->update($properties);
+	}
+	
+	/** convenience method for updating or inserting a record (as necessary)
+		@param qb - a querybuilder to identify the record for updating
+		@param params - the parameters to update/insert
+		@param defaults - additional parameters for insert
+	*/
+	public static function upsert(DTQueryBuilder $qb,array $params,array $defaults){
+		try{
+			$obj = new static($qb);
+			$obj->merge($params);
+			$obj->update();
+			return $obj["id"];
+		}catch(Exception $e){ //the record doesn't exist, insert it instead
+			$obj = new static($defaults);
+			$obj->merge($params);
+			return $obj->insert();
+		}
 	}
 	
 	public static function select(DTQueryBuilder $qb){

@@ -17,10 +17,11 @@ class DTFile{
 	}
 	
 	public static function baseURL($suffix=''){
+	  $base = isset(DTSettings::$config["base_url"])?DTSettings::$config["base_url"]:$_SERVER['HTTP_HOST'];
 	  return sprintf(
 	    "%s://%s/%s",
 	    isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
-	    $_SERVER['HTTP_HOST'],
+	    $base,
 	    $suffix
 	  );
 	}

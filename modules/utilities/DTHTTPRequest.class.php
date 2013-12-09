@@ -44,8 +44,8 @@ class DTHTTPRequest{
 	/**
 		@return returns the body of the response
 	*/
-	public static function makeGETRequest($url,$params=array()){
-		$r = static::makeHTTPRequest($url,$params,"GET");
+	public static function makeGETRequest($url,$params=array(),&$cookies=array()){
+		$r = static::makeHTTPRequest($url,$params,"GET",$cookies);
 		if($r && $r->getResponseCode()==200)
 			return $r->getResponseBody();
 		return null;
@@ -54,8 +54,8 @@ class DTHTTPRequest{
 	/**
 		@return returns the body of the response
 	*/
-	public static function makePOSTRequest($url,$params=array()){
-		$r = static::makeHTTPRequest($url,$params,"POST");
+	public static function makePOSTRequest($url,$params=array(),&$cookies=array()){
+		$r = static::makeHTTPRequest($url,$params,"POST",$cookies);
 		if($r && $r->getResponseCode()==200)
 			return $r->getResponseBody();
 		return null;

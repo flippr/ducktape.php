@@ -11,6 +11,8 @@ class DTConsumer{
 	function __construct($api_name,$path=""){
 		$api = DTSettings::api();
 		$this->api_name = $api_name;
+		if(!isset($api[$api_name],$api[$api_name]["url"],$api[$api_name]["key"],$api[$api_name]["secret"]))
+			throw new Exception("Bad API entry: missing url, key, or secret");
 		$api_url = $api[$api_name]["url"];
 		$this->consumer_key = $api[$api_name]["key"];
 		$this->consumer_secret = $api[$api_name]["secret"];
@@ -32,12 +34,12 @@ class DTConsumer{
 		$r = DTHTTPRequest::makeHTTPRequest($this->provider_url,$params,$method,$_SESSION["{$this->api_name}_cookies"]); //using $_SESSION directly because of reference
 		if($r && $r->getResponseCode()==200)
 			return $this->formatResponse($params,$r->getResponseBody());
-		else if($r->getResponseCode()==278){
+		else if($r && $r->getResponseCode()==278){
 			$obj = $this->formatResponse($params,$r->getResponseBody());
 			$loc = $obj["location"];
 			$this->redirect($loc,$params);
 		}
-		DTLog::error("Failed to access provider ({$this->provider_url}):".$r->getResponseCode().":".$r->getResponseBody());		
+		DTLog::error("Failed to access provider ({$this->provider_url})");		
 		return null;
 	}
 	
@@ -55,6 +57,8 @@ class DTConsumer{
 	
 	/** convenience method for consumer scripts */
 	public function requestAndRespond(array $params, $method='POST'){
+		if(!isset($params["tok"],$params["act"]))
+			throw new Exception("Missing required request parameters (tok,act).");
 		$token = $this->upgradeToken($params["tok"]);
 		$action = $params["act"];
 		$response = new DTResponse($this->request($action,$params,$token,$method));

@@ -11,6 +11,8 @@ class DTSettings{
 	public static $storage = null;
 	protected static $api = null;
 	public static $default_database = null;
+	
+	protected static $_storage_connections = array(); //internal storage for singleton storage connections
 
 	public static function config(){
 		$yaml = dirname(__FILE__)."/../../../local/config.yml";
@@ -31,6 +33,17 @@ class DTSettings{
 		if(!isset(static::$api) && file_exists($yaml))
 			static::$api = yaml_parse_file($yaml);
 		return static::$api;
+	}
+	
+	/** retrieves/creates a sigleton connection from storage settings */
+	public static function fromStorage($store){
+		$storage = static::storage();
+		if(!isset(static::$_storage_connections[$store])){
+			$connector = $storage[$store]["connector"];
+			$dsn = $storage[$store]["dsn"];
+			static::$_storage_connections[$store] = new $connector($dsn);
+		}
+		return static::$_storage_connections[$store];
 	}
 }
 
