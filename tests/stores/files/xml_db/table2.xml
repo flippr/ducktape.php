@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+   <element>
+      <author_id>1</author_id>
+      <name>On the Electrodynamics of Moving Bodies</name>
+      <year>1905</year>
+   </element>
+   <element>
+      <author_id>1</author_id>
+      <name>Fundamental Ideas and Problems of the Theory of Relativity</name>
+      <year>1923</year>
+   </element>
+   <element>
+      <author_id>1</author_id>
+      <name>On Science and Religion</name>
+      <year>1940</year>
+   </element>
+   <element>
+      <author_id>2</author_id>
+      <name>Principia</name>
+      <year>1687</year>
+   </element>
+   <element>
+      <author_id>2</author_id>
+      <name>Method of Fluxions</name>
+      <year>1671</year>
+   </element>
+   <element>
+      <author_id>2</author_id>
+      <name>Opticks</name>
+      <year>1704</year>
+   </element>
+   <element>
+      <author_id>3</author_id>
+      <name>Dioptrice</name>
+      <year>1611</year>
+   </element>
+   <element>
+      <author_id>3</author_id>
+      <name>Somnium</name>
+      <year>1634</year>
+   </element>
+   <element>
+      <author_id>3</author_id>
+      <name>Harmonice Mundi</name>
+      <year>1619</year>
+   </element>
+</root>

@@ -8,7 +8,6 @@ class DTModel implements arrayaccess {
 	/** require properties to be defined in the class, defaults to false */
 	protected static $strict_properties = false;
 	protected static $storage_table = null;
-	public $db = null;
 	
 	public $id = 0;
 
@@ -24,7 +23,6 @@ class DTModel implements arrayaccess {
 			$properties = $paramsOrQuery;
     	}else if($paramsOrQuery instanceof DTQueryBuilder){ //grab the parameters from storage
     		$this->_bypass_accessors = true; //we want direct access to properties by default
-    		$this->db = $paramsOrQuery->db; //keep track of the database we came from
     		if(isset(static::$storage_table))
 	    		$properties = $paramsOrQuery->from(static::$storage_table)->select1();
 	    	if(!isset($properties))
@@ -185,8 +183,8 @@ class DTModel implements arrayaccess {
 		}
 	}
 	
-	public static function select(DTQueryBuilder $qb){
-		return $qb->from(static::$storage_table)->selectAs(get_called_class());
+	public static function select(DTQueryBuilder $qb,$cols="*"){
+		return $qb->from(static::$storage_table)->selectAs(get_called_class(),$cols);
 	}
 	
 	public static function updateRows(DTQueryBuilder $qb,$params){

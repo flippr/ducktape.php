@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+   <element>
+      <born>1879-03-14</born>
+      <died>1955-04-18</died>
+      <first_name>Albert</first_name>
+      <id>1</id>
+      <last_name>Einstein</last_name>
+   </element>
+   <element>
+      <born>1642-12-25</born>
+      <died>1727-03-20</died>
+      <first_name>Isaac</first_name>
+      <id>2</id>
+      <last_name>Newton</last_name>
+   </element>
+   <element>
+      <born>1571-12-27</born>
+      <died>1630-11-15</died>
+      <first_name>Johannes</first_name>
+      <id>3</id>
+      <last_name>Kepler</last_name>
+   </element>
+</root>

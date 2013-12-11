@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+   <element>
+      <born>1879-03-14</born>
+      <died>1955-04-18</died>
+      <first_name>Albert</first_name>
+      <last_name>Einstein</last_name>
+      <selected_publications>
+         <element>
+            <name>On the Electrodynamics of Moving Bodies</name>
+            <year>1905</year>
+         </element>
+         <element>
+            <name>Fundamental Ideas and Problems of the Theory of Relativity</name>
+            <year>1923</year>
+         </element>
+         <element>
+            <name>On Science and Religion</name>
+            <year>1940</year>
+         </element>
+      </selected_publications>
+   </element>
+   <element>
+      <born>1642-12-25</born>
+      <died>1727-03-20</died>
+      <first_name>Isaac</first_name>
+      <last_name>Newton</last_name>
+      <selected_publications>
+         <element>
+            <name>Principia</name>
+            <year>1687</year>
+         </element>
+         <element>
+            <name>Method of Fluxions</name>
+            <year>1671</year>
+         </element>
+         <element>
+            <name>Opticks</name>
+            <year>1704</year>
+         </element>
+      </selected_publications>
+   </element>
+   <element>
+      <born>1571-12-27</born>
+      <died>1630-11-15</died>
+      <first_name>Johannes</first_name>
+      <last_name>Kepler</last_name>
+      <selected_publications>
+         <element>
+            <name>Dioptrice</name>
+            <year>1611</year>
+         </element>
+         <element>
+            <name>Somnium</name>
+            <year>1634</year>
+         </element>
+         <element>
+            <name>Harmonice Mundi</name>
+            <year>1619</year>
+         </element>
+      </selected_publications>
+   </element>
+</root>

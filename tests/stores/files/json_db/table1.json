@@ -1,0 +1,23 @@
+[
+    {
+    	"id":1,
+        "first_name": "Albert",
+        "last_name": "Einstein",
+        "born": "1879-03-14",
+        "died": "1955-04-18"
+    },
+    {
+    	"id":2,
+        "first_name": "Isaac",
+        "last_name": "Newton",
+        "born": "1642-12-25",
+        "died": "1727-03-20"
+    },
+    {
+    	"id":3,
+        "first_name": "Johannes",
+        "last_name": "Kepler",
+        "born": "1571-12-27",
+        "died": "1630-11-15"
+    }
+]

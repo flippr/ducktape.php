@@ -1,0 +1,29 @@
+---
+- author_id: 1
+  name: On the Electrodynamics of Moving Bodies
+  year: 1905
+- author_id: 1
+  name: Fundamental Ideas and Problems of the Theory of Relativity
+  year: 1923
+- author_id: 1
+  name: On Science and Religion
+  year: 1940
+- author_id: 2
+  name: Principia
+  year: 1687
+- author_id: 2
+  name: Method of Fluxions
+  year: 1671
+- author_id: 2
+  name: Opticks
+  year: 1704
+- author_id: 3
+  name: Dioptrice
+  year: 1611
+- author_id: 3
+  name: Somnium
+  year: 1634
+- author_id: 3
+  name: Harmonice Mundi
+  year: 1619
+...

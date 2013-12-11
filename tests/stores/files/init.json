@@ -1,0 +1,62 @@
+[
+    {
+        "first_name": "Albert",
+        "last_name": "Einstein",
+        "born": "1879-03-14",
+        "died": "1955-04-18",
+        "selected_publications": [
+            {
+                "name": "On the Electrodynamics of Moving Bodies",
+                "year": 1905
+            },
+            {
+                "name": "Fundamental Ideas and Problems of the Theory of Relativity",
+                "year": 1923
+            },
+            {
+                "name": "On Science and Religion",
+                "year": 1940
+            }
+        ]
+    },
+    {
+        "first_name": "Isaac",
+        "last_name": "Newton",
+        "born": "1642-12-25",
+        "died": "1727-03-20",
+        "selected_publications": [
+            {
+                "name": "Principia",
+                "year": 1687
+            },
+            {
+                "name": "Method of Fluxions",
+                "year": 1671
+            },
+            {
+                "name": "Opticks",
+                "year": 1704
+            }
+        ]
+    },
+    {
+        "first_name": "Johannes",
+        "last_name": "Kepler",
+        "born": "1571-12-27",
+        "died": "1630-11-15",
+        "selected_publications": [
+            {
+                "name": "Dioptrice",
+                "year": 1611
+            },
+            {
+                "name": "Somnium",
+                "year": 1634
+            },
+            {
+                "name": "Harmonice Mundi",
+                "year": 1619
+            }
+        ]
+    }
+]
