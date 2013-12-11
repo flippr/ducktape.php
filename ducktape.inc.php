@@ -10,8 +10,8 @@ if (version_compare(PHP_VERSION, '5.3') < 0)
 
 //3rd party libs
 require_once dirname(__FILE__).'/lib/gisconverter.php/gisconverter.php';
-require_once dirname(__FILE__).'/lib/tmhoauth/tmhOAuth.php';
-require_once dirname(__FILE__).'/lib/php-sql-parser/php-sql-parser.php';
+//require_once dirname(__FILE__).'/lib/tmhoauth/tmhOAuth.php';
+//require_once dirname(__FILE__).'/lib/php-sql-parser/php-sql-parser.php';
 
 //check for cgi access and populate $_REQUEST
 if(isset($argc))
