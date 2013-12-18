@@ -1,13 +1,13 @@
 <?php
 require_once(dirname(__FILE__)."/../../ducktape.inc.php");
+dt_load_module("tests","providers_oauth");
 
 class DTSecureAuthenticationProviderTest extends DTTestCase{
 	protected $provider;
-
-	public function setUp(){
-		$encrypted = DTUser::encryptPassword("testpass");
 	
-		$init_sql = <<<END
+	public function initSQL($sql=""){
+		$encrypted = DTUser::encryptPassword("testpass");
+		return $sql.<<<END
 		CREATE TABLE users (
 			id integer NOT NULL primary key autoincrement,
 			alias text,
@@ -43,7 +43,11 @@ class DTSecureAuthenticationProviderTest extends DTTestCase{
 		INSERT INTO consumers (id,name,verifier,consumer_key,secret,status)
 			VALUES (1,'validconsumer','verifier.php','consumerkey','consumersecret',1);
 END;
-		$this->provider = new DTSecureAuthenticationProvider($this->initDB($init_sql));
+	}
+
+	public function setup(){
+		parent::setup();
+		$this->provider = new DTSecureAuthenticationProvider(null,$this->db);
 	}
 	
 	public function testActionAuthenticate(){

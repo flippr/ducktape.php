@@ -3,6 +3,9 @@ require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTResponseTest extends DTTestCase{
 	public function testObjectAsRenderable(){
+		$test_null = null;
+		$this->assertNull(DTResponse::objectAsRenderable($test_null));
+	
 		$test_bool = false;
 		$this->assertEquals(false,DTResponse::objectAsRenderable($test_bool));
 	

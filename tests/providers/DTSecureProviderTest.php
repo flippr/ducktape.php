@@ -3,9 +3,9 @@ require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTSecureProviderTest extends DTTestCase{
 	protected $provider = null;
-
-	public function setUp(){
-		$init_sql = <<<END
+	
+	public function initSQL($sql=""){
+		return $sql.<<<END
 		CREATE TABLE tokens (
 			id integer primary key autoincrement,
 			type int default 0,
@@ -26,7 +26,11 @@ class DTSecureProviderTest extends DTTestCase{
 		INSERT INTO tokens (type,status,token,secret) VALUES (0,1,'authorizedrequesttoken','requestsecret');
 		INSERT INTO tokens (type,status,token,secret) VALUES (1,0,'accesstoken','accesssecret');
 END;
-		$this->provider = new DTSecureProvider($this->initDB($init_sql));
+	}
+
+	public function setup(){
+		parent::setup();
+		$this->provider = new DTProvider(new DTOAuthVerifier(),$this->db);
 	}
 
 	public function testRequestToken(){

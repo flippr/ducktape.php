@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__FILE__)."/../../../ducktape.inc.php";
+dt_load_module("stores_file");
 
 class DTYAMLStoreTest extends DTTestCase{
 	protected $yaml_str;

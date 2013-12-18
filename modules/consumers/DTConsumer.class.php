@@ -2,22 +2,13 @@
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTConsumer{
-	protected $consumer_key;
-	protected $consumer_secret;
-	protected $provider_url;
+	protected $api;
+	protected $url;
 	protected $async;
-	protected $api_name;
 	
 	function __construct($api_name,$path=""){
-		$api = DTSettings::api();
-		$this->api_name = $api_name;
-		if(!isset($api[$api_name],$api[$api_name]["url"],$api[$api_name]["key"],$api[$api_name]["secret"]))
-			throw new Exception("Bad API entry: missing url, key, or secret");
-		$api_url = $api[$api_name]["url"];
-		$this->consumer_key = $api[$api_name]["key"];
-		$this->consumer_secret = $api[$api_name]["secret"];
-		if(substr($api_url,-1)!="/") $api_url .= "/";
-		$this->provider_url = $api[$api_name]["url"].$path;
+		$this->api = DTAPI::fromAPI($api_name);
+		$this->url = $this->api["url"].$path;
 		$this->async = isset($_REQUEST['dt_async']);
 	}
 
@@ -28,10 +19,12 @@ class DTConsumer{
 		DTSession::sharedSession(); //have to start the session
 		$params["act"] = $action;
 		if($provider_token==null && !$this->async )
-			$provider_token = DTProvider::providerToken($this->consumer_key,$this->consumer_secret);
+			$provider_token = $this->api->providerToken();
 		$params["tok"] = $provider_token;
+		if(!isset($params["tok"],$params["act"]))
+			throw new Exception("Missing required request parameters (tok,act).");
 		// this cookie parameter is essential for getting the same session with each request (whether this *should* be done for public APIs is another question...)
-		$r = DTHTTPRequest::makeHTTPRequest($this->provider_url,$params,$method,$_SESSION["{$this->api_name}_cookies"]); //using $_SESSION directly because of reference
+		$r = DTHTTPRequest::makeHTTPRequest($this->url,$params,$method,$_SESSION["{$this->api["name"]}_cookies"]); //using $_SESSION directly because of reference
 		if($r && $r->getResponseCode()==200)
 			return $this->formatResponse($params,$r->getResponseBody());
 		else if($r && $r->getResponseCode()==278){
@@ -39,7 +32,7 @@ class DTConsumer{
 			$loc = $obj["location"];
 			$this->redirect($loc,$params);
 		}
-		DTLog::error("Failed to access provider ({$this->provider_url})");		
+		DTLog::error("Failed to access provider ({$this->url})");		
 		return null;
 	}
 	
@@ -57,10 +50,8 @@ class DTConsumer{
 	
 	/** convenience method for consumer scripts */
 	public function requestAndRespond(array $params, $method='POST'){
-		if(!isset($params["tok"],$params["act"]))
-			throw new Exception("Missing required request parameters (tok,act).");
-		$token = $this->upgradeToken($params["tok"]);
-		$action = $params["act"];
+		$token = isset($params["tok"])?$this->upgradeToken($params["tok"]):null;
+		$action = isset($params["act"])?$params["act"]:null; //these can be (correctly) omitted, for example during authentication at oauth_verifier
 		$response = new DTResponse($this->request($action,$params,$token,$method));
 		$response->respond($params);
 		return $response;
@@ -79,33 +70,12 @@ class DTConsumer{
 	}
 	
 	/**
-	ensures that consumer requests come from a known session
-	@return returns a token to be included in requests to consumers
-	*/
-	public static function consumerTokenForAPI($api_name){
-		$api = DTSettings::api();
-		$consumer_key = $api[$api_name]["key"];
-		$consumer_secret = $api[$api_name]["secret"];
-		return static::consumerToken($consumer_key,$consumer_secret);
-	}
-	
-	/** generate a valid consumer token
-	@param consumer_key - should come from api config
-	@param consumer_secret - should come from api config
-	@param permutation - varies the token, default varies by session id. Use this to generate state-free tokens
-	*/
-	public static function consumerToken($consumer_key,$consumer_secret){
-		$session = DTSession::sharedSession(); //ensure the session is started
-		return substr(md5($consumer_secret.$consumer_key.session_id()),0,10).$consumer_key;
-	}
-	
-	/**
 	verifies and upgrades a consumer token to a provider token
 	@return returns a provider token or false
 	*/
 	public function upgradeToken($consumer_token){
-		if($consumer_token==$this->consumerToken($this->consumer_key,$this->consumer_secret))
-			return DTProvider::providerToken($this->consumer_key,$this->consumer_secret);
+		if($this->api->verifyConsumerToken($consumer_token))
+			return $this->api->providerToken();
 		DTLog::warn("Failed to upgrade consumer token ({$consumer_token}).");
 		return false;
 	}

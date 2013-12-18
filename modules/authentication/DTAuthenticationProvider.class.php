@@ -30,7 +30,7 @@ class DTAuthenticationProvider extends DTProvider{
 		authenticate an active user
 		@param user - the username
 		@param pass - the password
-		@return returns a valid user object and sets the session variable +dt_user_id+, or null if authentication fails
+		@return returns a valid user object and sets the session variable +pvd_user_id+, or null if authentication fails
 	*/
 	public function actionAuthenticate(){
 		$session = DTSession::sharedSession();
@@ -39,11 +39,11 @@ class DTAuthenticationProvider extends DTProvider{
 		try{
 			$u = new DTUser($this->db->where("alias='{$alias}' and is_active=1"));
 			if($u->verifyPassword($password)){
-				$session["dt_user_id"] = $u["id"];
+				$session["pvd_user_id"] = $u["id"];
 				return $u;
 			}
 		}catch(Exception $e){}
-		unset($session["dt_user_id"]);
+		unset($session["pvd_user_id"]);
 		return null;
 	}
 	

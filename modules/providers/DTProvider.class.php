@@ -5,11 +5,15 @@ class DTProvider{
 	protected $params = null;
 	public $session = null;
 	protected $response = null;
+	public $verifier = null;
 	
-	function __construct($db=null){
+	function __construct(DTVerifier $verifier=null,DTStore $db=null){
 		$this->db = isset($db)?$db:DTSettings::$default_database;
 		$this->setParams($_REQUEST);
+		$token = $this->params->stringParam("tok");
+		$this->verifier = isset($verifier)?$verifier:new DTBasicVerifier($this->db,$token);
 		$this->response = new DTResponse();
+		$this->session = DTSession::sharedSession();
 	}
 	
 	function actionSessionDestroy(){
@@ -20,25 +24,17 @@ class DTProvider{
 		$this->params = new DTParams($params,$this->db);
 	}
 	
-	public static function currentUser(DTDatabase $db=null){
-		if(!isset($db)) $db = DTSettings::$default_database;
-		$session = DTSession::sharedSession();
+	public function actionCurrentUser(){
 		try{
-			$uid = $session["dt_user_id"];
-			if(isset($uid))
-				return new DTUser($db->where("id='{$uid}'"));
+			return $this->currentUser();
 		}catch(Exception $e){
 			DTLog::error("Could not find current user.");
 		}
 		return null;
 	}
 	
-	/**
-	ensures that provider requests come from a known source (this token should never be public!)
-	@return returns a token to be included in reqests to providers
-	*/
-	public static function providerToken($consumer_key,$consumer_secret){
-		return substr(md5($consumer_secret.$consumer_key),0,10).$consumer_key;
+	public function currentUser(){
+			return new DTUser($this->db->where("id='{$this->session["pvd_user_id"]}'"));
 	}
 	
 //==================
@@ -62,17 +58,7 @@ class DTProvider{
 	}
 	
 	public function verifyRequest($action){
-		$token = $this->params->stringParam("tok");
-		$consumer_key = substr($token,10);
-	    $query = "SELECT * FROM consumers WHERE consumer_key='{$consumer_key}' AND status=1";
-	    $rows = $this->db->select($query);
-	    if(count($rows)>0){
-		    $row = $rows[0];
-		    if(static::providerToken($row["consumer_key"],$row["secret"])==$token)
-			    return true;
-		}
-		DTLog::error("Invalid request for consumer ({$action})");
-		return false;
+		return $this->verifier->verify($action);
 	}
 
 	/**
@@ -81,26 +67,19 @@ class DTProvider{
 	@note if action is the name of a method, the appropriate method is called
 	*/
 	protected function performAction($action=null){
-		$this->startSession();
 		$action = (isset($action)?$action:$this->params->stringParam("act"));
 		try{
 			$meth = new ReflectionMethod($this,$action);
-			if(method_exists($this, $action) && $meth->isPublic()){
+			if(method_exists($this, $action) && $meth->isPublic())
 				$this->setResponse($this->$action());
-			}
 		}catch(Exception $e){
 			DTLog::warn("Action not found ({$action}): ".$e->getMessage());
 		}
 	}
 	
-	protected function startSession(){
-		$this->session = DTSession::sharedSession(); //must go here for oauth token population
-	}
-	
 	public function setResponse($response){
 		$this->response->setResponse($response);
 	}
-	
 	
 	public function responseCode(){
 		return $this->response->error();
@@ -114,42 +93,10 @@ class DTProvider{
 	}
 ///@}
 	
-	/**
-		determines whether a request comes from a valid source, default method varies by session and changes key at UTC dateline (keys are valid for 1 minute after midnight)
-		@param appkey the appkey to validate
-		@return returns TRUE for valid requests
-	*/
-	protected function verifyAppkey($key){
-		$date = gmdate("m-d-Y");
-		$minus1MinDate = gmdate("m-d-Y",strtotime("-1 minute"));
-		$session_id = session_id();
-		$verify_appkey = SHA1(DTSettings::$config["api"]["secret"].":{$session_id}:{$date}");
-		$minus1MinDate_appkey = SHA1(DTSettings::$config["api"]["secret"].":{$session_id}:{$minus1MinDate}");
-		$verified = ($verify_appkey == $key || $minus1MinDate_appkey == $key);
-		if(!$verified)
-			DTLog::error("failed to verify appkey!");
-		return $verified;
-	}
-	
 	protected function recordRequest(){
-		/*$record = $this->record;
-		$record["code"] = $this->response["code"];
-		$record["status"] = $this->response["status"];
-		$session = $this->getSession();
-		$record["user_id"] = intval((isset($session["he_user_id"])?$session["he_user_id"]:0));
-		$query = "
-		INSERT INTO requests (
-			action,status,code,query,ip,identifier,user_id,service,useragent
-			) VALUES (
-				'{$record["action"]}',
-				'{$record["status"]}',
-				'{$record["code"]}',
-				'{$record["query"]}',
-				'{$record["ip"]}',
-				 {$record["identifier"]},
-				 {$record["user_id"]},
-				'{$record["service"]}',
-				'{$record["useragent"]}')";
-		$this->db->query($query);*/
+		try{
+			$recording_db = DTSettings::fromStorage("logs");
+			//@todo write to logs db
+		}catch(Exception $e){}
 	}
 }

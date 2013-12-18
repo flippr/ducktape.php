@@ -46,7 +46,7 @@ class DTUser extends DTModel{
 		if(!isset($salt))
 			$salt = DTUser::generateString(5,DT_SALT_CHARSET);
 		$salt = substr($salt,0,10);
-		return substr(sha1($pass.$salt),strlen($salt)).$salt;
+		return substr(sha1($pass.$salt),strlen($salt)).$salt; // encrypted = tail of sha1 + salt
 	}
 	
 	/**

@@ -107,6 +107,7 @@ abstract class DTStore{
 	abstract public function lastInsertID();
 	/** @return returns an array column names */
 	abstract public function columnsForTable($table);
+	/** @return returns an array of table names */
 	abstract public function allTables();
 	
 	

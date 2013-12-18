@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__FILE__)."/../../../ducktape.inc.php";
-
-class DTSQLEngineTest extends DTTestCase{
+//under construction
+/*class DTSQLEngineTest extends DTTestCase{
 	protected $store;
 	protected $engine;
 	
@@ -127,4 +127,4 @@ END;
 		var_dump($rows);
 	}
 
-}
+}*/

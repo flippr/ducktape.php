@@ -1,22 +1,8 @@
 <?php
 require_once dirname(__FILE__)."/../../../ducktape.inc.php";
+dt_load_module("location");
 
 class DTGeoSQLiteDatabaseTest extends DTGeoTestCase{
-	protected $db = null;
-	
-	public function setUp(){
-		$init_sql = <<<END
-		CREATE TABLE locations(
-			id integer NOT NULL primary key autoincrement,
-			latitude double,
-			longitude double,
-			geom BLOB
-		);
-END;
-	
-		$this->db = $this->initDB($init_sql);
-	}
-	
 	public function testGeomFromText(){
 		$wkt = "POINT(-97.0 38.0)";
 		$geom_blob = DTGeoSQLiteDatabase::geomFromText($wkt,4326);

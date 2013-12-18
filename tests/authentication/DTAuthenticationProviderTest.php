@@ -1,13 +1,14 @@
 <?php
 require_once(dirname(__FILE__)."/../../ducktape.inc.php");
 
+dt_load_module("tests","authentication");
+
 class DTAuthenticationProviderTest extends DTTestCase{
 	protected $provider;
-
-	public function setUp(){
-		$encrypted = DTUser::encryptPassword("testpass");
 	
-		$init_sql = <<<END
+	public function initSQL($sql=""){
+		$encrypted = DTUser::encryptPassword("testpass");
+		return $sql.<<<END
 		CREATE TABLE users (
 			id integer NOT NULL primary key autoincrement,
 			alias text,
@@ -29,7 +30,11 @@ class DTAuthenticationProviderTest extends DTTestCase{
 		
 		INSERT INTO reset_tokens (alias,token) VALUES ('testuser','testtoken');
 END;
-		$this->provider = new DTAuthenticationProvider($this->initDB($init_sql));
+	}
+
+	public function setup(){
+		parent::setup();
+		$this->provider = new DTAuthenticationProvider(null,$this->db);
 	}
 	
 	public function testActionAuthenticate(){
@@ -37,7 +42,7 @@ END;
 		$this->provider->setParams(array("alias"=>"testuser","password"=>"testpass"));
 		$u = $this->provider->actionAuthenticate();
 		$this->assertNotNull($u,"failed to authenticate testuser.");
-		$this->assertEquals($u["id"], $session["dt_user_id"]);
+		$this->assertEquals($u["id"], $session["pvd_user_id"]);
 	}
 	
 	public function testBadPassword(){
@@ -45,7 +50,7 @@ END;
 		$this->provider->setParams(array("alias"=>"testuser","password"=>"wrongpass"));
 		$u = $this->provider->actionAuthenticate();
 		$this->assertNull($u,"failed to deny authentication.");
-		$this->assertFalse(isset($session["dt_user_id"]));
+		$this->assertFalse(isset($session["pvd_user_id"]));
 	}
 	
 	public function testNonUser(){
@@ -53,7 +58,7 @@ END;
 		$this->provider->setParams(array("alias"=>"notauser","password"=>"doesntmatter"));
 		$u = $this->provider->actionAuthenticate();
 		$this->assertNull($u,"failed to deny non-user");
-		$this->assertFalse(isset($session["dt_user_id"]));
+		$this->assertFalse(isset($session["pvd_user_id"]));
 	}
 	
 	public function testActionPasswordResetToken(){

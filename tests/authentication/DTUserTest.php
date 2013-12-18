@@ -2,23 +2,19 @@
 require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 class DTUserTest extends DTTestCase{
-	protected $db = null;
-
-	public function setUp(){
-		$init_sql = <<<END
-		CREATE TABLE users (
-			id integer NOT NULL primary key autoincrement,
-			"alias" text,
-			password character(40),
-			created_at time with time zone,
-			is_active integer default 1,
-			is_admin integer default 0
-		);
+	protected function initSQL($sql=""){
+		return $sql.<<<END
+CREATE TABLE users (
+	id integer NOT NULL primary key autoincrement,
+	"alias" text,
+	password character(40),
+	created_at time with time zone,
+	is_active integer default 1,
+	is_admin integer default 0
+);
 END;
+}
 
-		$this->db = $this->initDB($init_sql);
-	}
-	
 	public function testConstructor(){
 		$user = new DTUser(array("alias"=>"testuser","password"=>"testpass"));
 		$this->assertEquals($user["alias"],"testuser");
