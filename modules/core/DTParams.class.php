@@ -3,7 +3,7 @@ require_once dirname(__FILE__)."/../../ducktape.inc.php";
 
 
 class DTParams{
-	public $params;
+	protected $params;
 	public $db;
 
 	function __construct(array $params=null,$db=null){

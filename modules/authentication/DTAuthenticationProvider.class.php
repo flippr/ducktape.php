@@ -82,5 +82,9 @@ class DTAuthenticationProvider extends DTProvider{
 		}
 		return true;
 	}
+	
+	public function currentUserID(){
+			return $this->session["pvd_user_id"];
+	}
 }
 ///@}

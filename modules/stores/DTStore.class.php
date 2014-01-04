@@ -120,8 +120,10 @@ abstract class DTStore{
 	public function selectAs($stmt,$class_name){
 		$list = array();
 		$rows = $this->select($stmt);
-		foreach($rows as $r)
-			$list[] = new $class_name($r);
+		foreach($rows as $r){
+			$obj = $list[] = new $class_name($r);
+			$obj->setStore($this); //keep track of where we came from
+		}
 		return $list;
 	}
 	/** @return returns the id of the new row */
@@ -139,10 +141,9 @@ abstract class DTStore{
 		return $qb->where($where_str);
 	}
 	
-	/*public function join($join_str){
-		$qb = new DTQueryBuilder($this);
-		return $qb->join($join_str);
-	}*/
+	public function qb(){
+		return new DTQueryBuilder($this);
+	}
 	
 //===============
 //! Transactions

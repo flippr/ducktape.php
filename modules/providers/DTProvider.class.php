@@ -24,19 +24,6 @@ class DTProvider{
 		$this->params = new DTParams($params,$this->db);
 	}
 	
-	public function actionCurrentUser(){
-		try{
-			return $this->currentUser();
-		}catch(Exception $e){
-			DTLog::error("Could not find current user.");
-		}
-		return null;
-	}
-	
-	public function currentUser(){
-			return new DTUser($this->db->where("id='{$this->session["pvd_user_id"]}'"));
-	}
-	
 //==================
 //! Request Handling
 //==================

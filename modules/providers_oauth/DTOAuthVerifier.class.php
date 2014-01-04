@@ -81,7 +81,7 @@ class DTOAuthVerifier implements DTVerifier {
 	// checks both the request and access tokens
 	public function tokenHandler($provider) {
 		try{
-			$token = new DTOAuthToken($this->db->where("token='{$provider->token}'"));
+			$token = $this->token();
 			if($token["type"]==1 && $token["status"]==1) return OAUTH_TOKEN_REVOKED;
 			if($token["type"]==0 && $token["status"]==2) return OAUTH_TOKEN_USED;
 		}catch(Exception $e){
@@ -91,5 +91,13 @@ class DTOAuthVerifier implements DTVerifier {
 		
 		$provider->token_secret = $token["secret"];
 		return OAUTH_OK;
+	}
+	
+	/**
+		subclasses may override this method to provide custom token classes
+		@return returns the token associated with this connection
+	*/
+	public function token(){
+		return new DTOAuthToken($this->db->where("token='{$this->provider->token}'"));
 	}
 }

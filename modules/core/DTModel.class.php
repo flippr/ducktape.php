@@ -195,10 +195,21 @@ class DTModel implements arrayaccess {
 	}
 	
 	public static function select(DTQueryBuilder $qb,$cols="*"){
-		return $qb->from(static::$storage_table)->selectAs(get_called_class(),$cols);
+		return $qb->from(static::$storage_table." ".get_called_class())->selectAs(get_called_class(),$cols);
 	}
 	
 	public static function updateRows(DTQueryBuilder $qb,$params){
-		return $qb->from(static::$storage_table)->update($params);
+		return $qb->from(static::$storage_table." ".get_called_class())->update($params);
+	}
+	
+	public static function byID($db,$id,$cols="*"){
+		$rows = static::select($db->where(get_called_class().".id='{$id}'"),$cols);
+		if(count($rows)>0)
+			return $rows[0];
+		return null;
+	}
+	
+	function setStore($db=null){
+		$this->db = isset($db)?$db:DTSettings::$default_database;
 	}
 }

@@ -65,6 +65,7 @@ class DTQueryBuilder{
 	}
 	
 	public function selectAs($className,$cols="*"){
+		$cols = isset($cols)?$cols:"*";
 		$stmt = "SELECT {$cols} FROM {$this->from_clause} {$this->join_clause} WHERE {$this->where_clause} {$this->order_by} {$this->limit_clause}";
 		return $this->db->selectAs($stmt,$className);
 	}

@@ -7,10 +7,10 @@ class DTOAuthToken extends DTModel{
 
 	protected $type = 0;
 	protected $status = 0;
-	protected $token;
+	public $token;
 	protected $secret;
 	protected $consumer_id;
-	protected $user_id;
+	public $user_id;
 
 	public function __construct($paramsOrQuery=array()){
 		if(!$paramsOrQuery instanceof DTQueryBuilder) //new tokens have a token and secret generated randomly
