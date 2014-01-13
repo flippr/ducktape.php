@@ -24,7 +24,7 @@ class DTModel implements arrayaccess {
 		if(is_array($paramsOrQuery)){
 			$properties = $paramsOrQuery;
     	}else if($paramsOrQuery instanceof DTQueryBuilder){ //grab the parameters from storage
-    		$this->db=$paramsOrQuery; //save where we came from
+    		$this->db=$paramsOrQuery->db; //save where we came from
     		$this->_bypass_accessors = true; //we want direct access to properties by default
     		if(isset(static::$storage_table))
 	    		$properties = $paramsOrQuery->from(static::$storage_table)->select1();

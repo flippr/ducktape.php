@@ -7,9 +7,6 @@
 */
 if (version_compare(PHP_VERSION, '5.3') < 0) 
     die ('DuckTape requires PHP version 5.3 or higher.');
-
-if(isset($argc)) //check for cgi access and populate $_REQUEST
-	parse_str(implode('&',array_slice($argv,1)), $_REQUEST);
 	
 function dt_load_library($lib){
 	require_once dirname(__FILE__)."/lib/{$lib}";

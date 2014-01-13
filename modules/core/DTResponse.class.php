@@ -54,7 +54,7 @@ class DTResponse{
 	public static function render($str){
 		if(isset($_REQUEST["callback"])){ //handle jsonp
 			header("Content-Type:application/javascript");
-			$str = $_REQUEST["callback"]."( {$str} )";
+			$str = htmlspecialchars($_REQUEST["callback"])."( {$str} )";
 		}else
 			header('Content-Type: application/json; charset=utf-8');
 		echo $str;
