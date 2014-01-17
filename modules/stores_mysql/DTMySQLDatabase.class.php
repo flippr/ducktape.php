@@ -21,9 +21,9 @@ class DTMySQLDatabase extends DTDatabase{
 		$result = $this->conn->query($query);
 		if(!$result)
 			DTLog::error("Query failed: ".$this->conn->error."\n".$query);
-		$rows = $result->fetch_all(MYSQLI_ASSOC);
-		if(!$rows){
-			$rows = array();
+		$rows = array();
+		while($row = $result->fetch_assoc()){
+			$rows[] = $row;
 		}
 		return $rows;
 	}
