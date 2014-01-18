@@ -20,13 +20,3 @@ function dt_load_module(){
 }
 
 dt_load_module("core");
-	
-/*foreach(array( //for now we just load everything
-	'core','authentication','clips',
-	'consumers','consumers_oauth',
-	'location','providers','providers_oauth','roles',
-	'sql_engine','stores','stores_file',
-	'stores_mysql','stores_pgsql',
-	'stores_sqlite','tests','upload') as $mod){
-	dt_load_module($mod);
-}*/

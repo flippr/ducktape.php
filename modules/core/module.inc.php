@@ -1,6 +1,5 @@
 <?php
 require_once dirname(__FILE__)."/DTQueryBuilder.class.php";
-require_once dirname(__FILE__)."/DTHTTPRequest.class.php";
 require_once dirname(__FILE__)."/DTSettings.class.php";
 require_once dirname(__FILE__)."/DTLog.class.php";
 require_once dirname(__FILE__)."/DTParams.class.php";
