@@ -94,7 +94,7 @@ class DTModel implements arrayaccess {
     	override this method if you want to compare objects by a subset of properties
     	@return returns true if object is equal to +obj+
     */
-    public function isEqual(DTObject $obj){
+    public function isEqual(DTModel $obj){
 	    return $this==$obj;
     }
     
