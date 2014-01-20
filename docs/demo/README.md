@@ -18,8 +18,10 @@ sudo apt-get install php5
 
 #### FreeBSD Systems ####
 
+```
 portinstall -r lang/php5
 portinstall -r lang/php5-extensions
+```
 
 2. Installing the required PHP Extensions
 
@@ -28,6 +30,8 @@ portinstall -r lang/php5-extensions
 #### FreeBSD Systems ####
 
 ##### PHPUnit #####
+
+```
 portinstall -r devel/pear
 portinstall -r devel/php5-pcntl
 pear channel-discover pear.phpunit.de/PHPUnit
@@ -35,9 +39,13 @@ pear channel-discover pear.symfony.com
 pear install symfony/YAML
 pear install phpunit/PHP\_Invoker
 pear install phpunit/PHPUnit
+```
 
 ##### PHP YAML #####
+
+```
 portinstall -r textproc/pecl-yaml
+```
 
 Post-Installation
 -----------------
