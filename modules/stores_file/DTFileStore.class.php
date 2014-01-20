@@ -1,6 +1,7 @@
 <?php
 abstract class DTFileStore extends DTStore {
 	public $file_extension = "tab"; //subclasses can override this for custom file extensions
+	public $retain_id_attr = false;
 	protected $last_insert_id = 0;
 	protected $_filenames;
 	
@@ -77,9 +78,13 @@ abstract class DTFileStore extends DTStore {
 			$f = isset($this->_filenames[$t])?$this->_filenames[$t]:$t.".".$this->file_extension;
 			$obj = array();
 			foreach($rows as $r){
-				$id = $r["id"];
-				unset($r["id"]);
-				$obj[$id] = $r;
+				if($this->retain_id_attr){
+					$obj[] = $r;
+				}else{
+					$id = $r["id"];
+					unset($r["id"]);
+					$obj[$id] = $r;
+				}
 			}
 			file_put_contents($f, $this->serialize($obj));
 		}
@@ -105,6 +110,8 @@ abstract class DTFileStore extends DTStore {
 				$this->tables[$table] = array_map(function($k,$v){
 						return array_merge(array("id"=>$k),$v);
 					}, array_keys($obj),array_values($obj));
+			else
+				throw new Exception("Failed to load table from file: {$f}");
 		}
 	}
 	
