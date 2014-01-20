@@ -43,7 +43,7 @@ class DTLog{
 	}
 	
 	/** only emits message if debug */
-	public function debug($msg,$full_backtrace=false){
+	public static function debug($msg,$full_backtrace=false){
 		if(DTSettings::$config["logs"]["debug"]==true){
 			if(!isset(DTLog::$debug_fp)){
 				$debug_log = dirname(__FILE__)."/../../".DTSettings::$config["logs"]["path"].DTSettings::$config["logs"]["debug_log"];
@@ -60,7 +60,7 @@ class DTLog{
 	}
 	
 	/** private method for writing to a log file */
-	protected function write($fp,$msg,$bt_offset=0){
+	protected static function write($fp,$msg,$bt_offset=0){
 		$bt = debug_backtrace();
 		$file = basename($bt[1+$bt_offset]["file"]);
 		$line = $bt[1+$bt_offset]["line"];
