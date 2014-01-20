@@ -8,7 +8,7 @@ First, we need to make sure you have all the basics.
 System Configuration and Installation
 -------------------------------------
 
-1. Installing the latest PHP
+### Installing the latest PHP ###
 
 ducktape.php is currently developed and tested on PHP53.  Some extra warnings may exist when deployed on a PHP54 installation.  So the first step is getting PHP up and running on your system.
 
@@ -23,7 +23,7 @@ portinstall -r lang/php5
 portinstall -r lang/php5-extensions
 ```
 
-2. Installing the required PHP Extensions
+### Installing the required PHP Extensions ###
 
 #### Debian Based Systems ####
 
