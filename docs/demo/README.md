@@ -50,3 +50,11 @@ After installing the extensions mentioned above, make sure they are loaded into 
 You can deploy your ducktape.php in many different styles, but as pointed out on the [Expressive Analytics Ducktape.php Wiki](https://github.com/expressiveanalytics/ducktape.php/wiki/Getting-started-guide) following the suggested directory structure is great for security and version control of your application.
 
 1. Create a local, logs, and site folder next to your ducktape.php deployment
+    * cd /path/to/ducktape.php/../
+    * mkdir local logs site
+2. Create a generic Logging config file in your local folder
+    * touch ./local/config.yml
+    * cp ./ducktape.php/docs/demo/config.yml.dist ./local/config.yml
+3. Create a git repository in your site folder
+    * cd ./site
+    * git --init --bare --share
