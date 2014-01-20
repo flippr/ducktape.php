@@ -110,6 +110,8 @@ abstract class DTFileStore extends DTStore {
 				$this->tables[$table] = array_map(function($k,$v){
 						return array_merge(array("id"=>$k),$v);
 					}, array_keys($obj),array_values($obj));
+			else
+				throw new Exception("Failed to load table from file: {$f}");
 		}
 	}
 	

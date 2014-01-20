@@ -6,7 +6,7 @@ class DTCSVStore extends DTBackedFileStore{
 	public static function unserialize($str){
 		try{
 			return parseCSV($str);
-		}catch(Exception $e){}
+		}catch(Exception $e){ DTLog::error($e->getMessage());}
 		return null;
 	}
 	
@@ -31,6 +31,8 @@ function parseCSV($csv_string, $delimiter = ",", $skip_empty_lines = true, $trim
     );
     $headers = parse_fields($lines[0],$delimiter,$trim_fields);
     unset($lines[0]);
+    if(empty($lines[count($lines)])) //remove the last line, if empty
+    	array_pop($lines);
     return array_map(
     	function($line) use ($delimiter,$trim_fields,$headers){
 	        return array_combine($headers,parse_fields($line,$delimiter,$trim_fields));
