@@ -21,10 +21,10 @@ class DTSecureConsumer extends DTConsumer{
 		makes call to provider
 		@return returns a string containing the response
 	*/
-	protected function sendRequestToProvider($params,$method="POST",$multipart=false){
+	protected function sendRequestToProvider($url,$params,$method="POST",$multipart=false){
 		$mtd = (strtolower($method)=="get"?OAUTH_HTTP_METHOD_GET:OAUTH_HTTP_METHOD_POST);
 		try {
-		    $this->oauth->fetch($this->url,$params,$mtd);
+		    $this->oauth->fetch($url,$params,$mtd);
 		    return $this->oauth->getLastResponse();
 		} catch(OAuthException $E) {
 		    DTLog::error("Failed to access ({$this->provider_url})");
@@ -33,7 +33,10 @@ class DTSecureConsumer extends DTConsumer{
 
 	/** request negotiating OAuth protocol if necessary */
 	public function request($action, array $params=array(), $provider_token=null, $method='POST'){
-		$params["act"] = $action;
+		if($this->action_format=="suffix")
+			$url .= $action;
+		else
+			$params[$this->action_format] = $action;
 		if($provider_token==null && !$this->async )
 			$provider_token = $this->api->providerToken();
 		$params["tok"] = $provider_token;
@@ -42,7 +45,7 @@ class DTSecureConsumer extends DTConsumer{
 				throw new Exception("Missing required request parameters (tok,act).");
 		
 			$this->oauth->setToken($this->accessToken(),$this->accessTokenSecret());
-			return $this->formatResponse($params,$this->sendRequestToProvider($params,$method));
+			return $this->formatResponse($params,$this->sendRequestToProvider($url,$params,$method));
 		}else{
 			if(isset($_REQUEST[$this->param_initiate_access_token])){ //session doesn't exist yet...
 				//DTLog::debug("Step 2: access token");

@@ -4,9 +4,11 @@ require_once dirname(__FILE__)."/../../ducktape.inc.php";
 abstract class DTStore{
 	public $tables = array(); //internal storage for loaded data
 	public $dsn=null;
+	public $readonly;
 	
 	/** @param dsnOrTables - either a Data Source Name (DSN) or an array of tables in storage format */
-	function __construct($dsnOrTables=array()){
+	function __construct($dsnOrTables=array(),$readonly=false){
+		$this->readonly = $readonly;
 		if(is_array($dsnOrTables)) // we were given the represented store
 			$this->tables = $dsnOrTables;
 		else // create the store from the specified DSN
@@ -123,6 +125,19 @@ abstract class DTStore{
 		foreach($rows as $r){
 			$obj = $list[] = new $class_name($r);
 			$obj->setStore($this); //keep track of where we came from
+		}
+		return $list;
+	}
+	/** pairs the first 2 columns (key,val) in an assoc array
+	@returns the key-value paired query results */
+	public function selectKV($stmt){
+		$list = array();
+		$rows = $this->select($stmt);
+		$cols = array_keys($rows[0]);
+		$key_col = $cols[0];
+		$val_col = $cols[1];
+		foreach($rows as $r){ //pair keys and values
+			$list[$r[$key_col]] = $r[$val_col];
 		}
 		return $list;
 	}

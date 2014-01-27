@@ -5,11 +5,13 @@ class DTConsumer{
 	protected $api;
 	protected $url;
 	protected $async;
+	protected $action_format;
 	
 	function __construct($api_name,$path=""){
 		$this->api = DTAPI::fromAPI($api_name);
 		$this->url = $this->api["url"].$path;
 		$this->async = isset($_REQUEST['dt_async']);
+		$this->action_format = isset($this->api["action"])?$this->api["action"]:"act";
 	}
 
 	/** primary method of making a request to a DTSecureProvider
@@ -17,14 +19,18 @@ class DTConsumer{
 	*/
 	public function request($action, array $params=array(), $provider_token=null, $method='POST'){
 		DTSession::sharedSession(); //have to start the session
-		$params["act"] = $action;
+		$url = $this->url;
+		if($this->action_format=="suffix")
+			$url .= $action;
+		else
+			$params[$this->action_format] = $action;
 		if($provider_token==null && !$this->async )
 			$provider_token = $this->api->providerToken();
 		$params["tok"] = $provider_token;
 		if(!isset($params["tok"],$params["act"]))
 			throw new Exception("Missing required request parameters (tok,act).");
 		// this cookie parameter is essential for getting the same session with each request (whether this *should* be done for public APIs is another question...)
-		$r = DTHTTPRequest::makeHTTPRequest($this->url,$params,$method,$_SESSION["{$this->api["name"]}_cookies"]); //using $_SESSION directly because of reference
+		$r = DTHTTPRequest::makeHTTPRequest($url,$params,$method,$_SESSION["{$this->api["name"]}_cookies"]); //using $_SESSION directly because of reference
 		if($r && $r->getResponseCode()==200)
 			return $this->formatResponse($params,$r->getResponseBody());
 		else if($r && $r->getResponseCode()==278){

@@ -20,12 +20,12 @@ class DTModel implements arrayaccess {
     	@param paramsOrQuery - an assoc. array of default properties or DTQueryBuilder object
     */
     function __construct($paramsOrQuery=null){
+    	$this->_bypass_accessors = true; //we want direct access to properties by default
    		if(!isset($paramsOrQuery)) return; //just create an empty object
 		if(is_array($paramsOrQuery)){
 			$properties = $paramsOrQuery;
     	}else if($paramsOrQuery instanceof DTQueryBuilder){ //grab the parameters from storage
     		$this->db=$paramsOrQuery->db; //save where we came from
-    		$this->_bypass_accessors = true; //we want direct access to properties by default
     		if(isset(static::$storage_table))
 	    		$properties = $paramsOrQuery->from(static::$storage_table)->select1();
 	    	if(!isset($properties))
@@ -157,7 +157,7 @@ class DTModel implements arrayaccess {
 		@return returns the inserted id, or false if nothing was inserted
 	*/
 	public function insert(DTDatabase $db=null){
-		if(!isset($db)) $db = DTSettings::$default_database;
+		$db = (isset($db)?$db:$this->db);
 		$qb = new DTQueryBuilder($db);
 		$new_id = $qb->from(static::$storage_table)->insert($this->storageProperties($db,array(),"insert"));
 		$this->id = $new_id;
@@ -169,7 +169,7 @@ class DTModel implements arrayaccess {
 		@note uses the object's id property for where-clause
 	*/
 	public function update(DTDatabase $db=null){
-		if(!isset($db)) $db = DTSettings::$default_database;
+		$db = (isset($db)?$db:$this->db);
 		$properties = $this->storageProperties($db,array(),"update");
 		return $db->where("id='{$this->id}'")->from(static::$storage_table)->update($properties);
 	}
@@ -183,13 +183,15 @@ class DTModel implements arrayaccess {
 	public static function upsert(DTQueryBuilder $qb,array $params,array $defaults=array()){
 		try{
 			$obj = new static($qb);
+			$obj->setStore($qb->db);
 			$obj->merge($params);
-			$obj->update($qb->db);
+			$obj->update();
 			return $obj;
 		}catch(Exception $e){ //the record doesn't exist, insert it instead
 			$obj = new static($defaults);
+			$obj->setStore($qb->db);
 			$obj->merge($params);
-			$obj->insert($qb->db);
+			$obj->insert();
 			return $obj;
 		}
 	}
@@ -203,6 +205,8 @@ class DTModel implements arrayaccess {
 	}
 	
 	public static function byID($db,$id,$cols="*"){
+		if(!($db instanceof DTStore))
+			throw new Exception("invalid storage for id ('{$id}')");
 		$rows = static::select($db->where(get_called_class().".id='{$id}'"),$cols);
 		if(count($rows)>0)
 			return $rows[0];

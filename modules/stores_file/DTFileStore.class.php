@@ -73,20 +73,24 @@ abstract class DTFileStore extends DTStore {
 	}
 	
 	public function commit(){
-		$dsn = $this->dsn;
-		foreach($this->tables as $t=>$rows){
-			$f = isset($this->_filenames[$t])?$this->_filenames[$t]:$t.".".$this->file_extension;
-			$obj = array();
-			foreach($rows as $r){
-				if($this->retain_id_attr){
-					$obj[] = $r;
-				}else{
-					$id = $r["id"];
-					unset($r["id"]);
-					$obj[$id] = $r;
+		if(!$this->readonly){
+			$dsn = $this->dsn;
+			foreach($this->tables as $t=>$rows){
+				$f = isset($this->_filenames[$t])?$this->_filenames[$t]:$t.".".$this->file_extension;
+				$obj = array();
+				foreach($rows as $r){
+					if($this->retain_id_attr){
+						$obj[] = $r;
+					}else{
+						$id = $r["id"];
+						unset($r["id"]);
+						$obj[$id] = $r;
+					}
 				}
+				if(@file_put_contents($f, $this->serialize($obj))===false){
+					DTLog::debug("failed to write to file '{$f}'!");
+				} //it's OK that it doesn't write, sometimes... we may have set the file to read-only
 			}
-			file_put_contents($f, $this->serialize($obj));
 		}
 	}
 	
