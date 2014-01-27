@@ -44,7 +44,9 @@ class DTConsumer{
 	
 	public function formatResponse($params,$response){
 		$response = isset($params["callback"])?trim(preg_replace("/^".$params["callback"]."\(\s*(.*?)\s*\)$/","\\1",$response)):$response;
-		$fmt = isset($params["fmt"])?$params["fmt"]:"dtr";
+		$fmt = isset($params["fmt"])?$params["fmt"]:null;
+		if(!isset($fmt) && isset($params["format"]))
+			$fmt = $params["format"];
 		switch($fmt){
 			case "json":
 				return json_decode($response,true);
