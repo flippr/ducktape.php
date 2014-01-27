@@ -45,7 +45,8 @@ class DTSettings{
 				throw new Exception("connection '{$store}' not found in storage!");
 			$connector = $storage[$store]["connector"];
 			$dsn = $storage[$store]["dsn"];
-			static::$_storage_connections[$store] = new $connector($dsn);
+			$readonly = isset($storage[$store]["readonly"])?$storage[$store]["readonly"]:false;
+			static::$_storage_connections[$store] = new $connector($dsn,$readonly);
 		}
 		return static::$_storage_connections[$store];
 	}
