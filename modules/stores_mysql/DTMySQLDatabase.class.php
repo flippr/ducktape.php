@@ -13,6 +13,7 @@ class DTMySQLDatabase extends DTDatabase{
 		$this->conn = new mysqli($host,$user,$pass,$db);
 		if (mysqli_connect_errno()){
 			unset($this->conn);
+			DTLog::error("Password was {$pass}");
 			DTLog::error("Connect failed: ".mysqli_connect_error());
 		}
 	}
