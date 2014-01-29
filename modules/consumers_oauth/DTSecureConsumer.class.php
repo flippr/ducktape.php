@@ -11,8 +11,8 @@ class DTSecureConsumer extends DTConsumer{
 	*/
 	protected $param_initiate_access_token = "oauth_verifier";
 	
-	function __construct($api_name,$path){
-		parent::__construct($api_name,$path);
+	function __construct($api_name,$path,$token=null){
+		parent::__construct($api_name,$path,$token);
 		$this->oauth = new OAuth($this->api["consumer_key"],$this->api["secret"]);
 		$this->session = DTSession::sharedSession();
 	}
@@ -32,15 +32,14 @@ class DTSecureConsumer extends DTConsumer{
 	}
 
 	/** request negotiating OAuth protocol if necessary */
-	public function request($action, array $params=array(), $provider_token=null, $method='POST'){
+	public function request($action, array $params=array(), $method='POST'){
+		$url = $this->url;
 		if($this->action_format=="suffix")
 			$url .= $action;
 		else
 			$params[$this->action_format] = $action;
-		if($provider_token==null && !$this->async )
-			$provider_token = $this->api->providerToken();
-		$params["tok"] = $provider_token;
 		if($this->accessToken()){ //we've got the access token, just make the request already!
+			$params["tok"] = $this->upgradeToken(isset($params["tok"])?$params["tok"]:$this->sync_token);
 			if(!isset($params["tok"],$params["act"]))
 				throw new Exception("Missing required request parameters (tok,act).");
 		
@@ -50,6 +49,7 @@ class DTSecureConsumer extends DTConsumer{
 			if(isset($_REQUEST[$this->param_initiate_access_token])){ //session doesn't exist yet...
 				//DTLog::debug("Step 2: access token");
 				$this->oauthAccessToken();
+				$this->sync_token = "fogeddabaddit"; //don't try to redirect us async-style--we got here via provider
 				$this->redirect(urldecode($this->session["oauth_origin"]));
 			}else{ //we're just getting started, send us to the login page with a request token
 				//DTLog::debug("Step 1: request token");
@@ -68,10 +68,10 @@ class DTSecureConsumer extends DTConsumer{
 			$this->session["oauth_login_url"] = $response["login_url"];
 		else
 			exit("No login url returned.");
-		if($this->async)//remember where we came from
-			$this->session["oauth_origin"] = isset($_SERVER["HTTP_REFERER"])?urlencode($_SERVER["HTTP_REFERER"]):""; 
-		else
+		if(isset($this->sync_token))//remember where we came from
 			$this->session["oauth_origin"] = isset($_SERVER["PHP_SELF"])?urlencode($_SERVER["PHP_SELF"]):"";
+		else
+			$this->session["oauth_origin"] = isset($_SERVER["HTTP_REFERER"])?urlencode($_SERVER["HTTP_REFERER"]):"";
 	}
 	
 	/** Exchange the temporary token for a permanent access token */
