@@ -11,8 +11,8 @@ class DTSecureConsumer extends DTConsumer{
 	*/
 	protected $param_initiate_access_token = "oauth_verifier";
 	
-	function __construct($api_name,$path){
-		parent::__construct($api_name,$path);
+	function __construct($api_name,$path,$token=null){
+		parent::__construct($api_name,$path,$token);
 		$this->oauth = new OAuth($this->api["consumer_key"],$this->api["secret"]);
 		$this->session = DTSession::sharedSession();
 	}
@@ -33,12 +33,13 @@ class DTSecureConsumer extends DTConsumer{
 
 	/** request negotiating OAuth protocol if necessary */
 	public function request($action, array $params=array(), $method='POST'){
+		$url = $this->url;
 		if($this->action_format=="suffix")
 			$url .= $action;
 		else
 			$params[$this->action_format] = $action;
-		$params["tok"] = $this->upgradeToken(isset($params["tok"])?$params["tok"]:$this->sync_token);
 		if($this->accessToken()){ //we've got the access token, just make the request already!
+			$params["tok"] = $this->upgradeToken(isset($params["tok"])?$params["tok"]:$this->sync_token);
 			if(!isset($params["tok"],$params["act"]))
 				throw new Exception("Missing required request parameters (tok,act).");
 		
@@ -48,6 +49,7 @@ class DTSecureConsumer extends DTConsumer{
 			if(isset($_REQUEST[$this->param_initiate_access_token])){ //session doesn't exist yet...
 				//DTLog::debug("Step 2: access token");
 				$this->oauthAccessToken();
+				$this->sync_token = "fogeddabaddit"; //don't try to redirect us async-style--we got here via provider
 				$this->redirect(urldecode($this->session["oauth_origin"]));
 			}else{ //we're just getting started, send us to the login page with a request token
 				//DTLog::debug("Step 1: request token");
