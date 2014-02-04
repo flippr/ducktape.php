@@ -109,12 +109,13 @@ abstract class DTFileStore extends DTStore {
 			$info = pathinfo($f);
 			$table = $info["filename"];
 			$this->_filenames[$table]=$f;
-			$obj = $this->unserialize(file_get_contents("{$f}"));
+			$contents = file_get_contents("{$f}");
+			$obj = $this->unserialize($contents);
 			if(isset($obj))
 				$this->tables[$table] = array_map(function($k,$v){
 						return array_merge(array("id"=>$k),$v);
 					}, array_keys($obj),array_values($obj));
-			else
+			else if(!empty($contents))
 				throw new Exception("Failed to load table from file: {$f}");
 		}
 	}

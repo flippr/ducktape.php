@@ -80,7 +80,7 @@ class DTUser extends DTModel{
 	}
 	
 	public function merge(array $params){
-		if(!isset($params["password"])||$params["password"]==""||$params["password"]!=$params["verify"])
+		if(empty($params["password"])||empty($params["verify"])||$params["password"]!=$params["verify"])
 			unset($params["password"]); //don't set the password if it was left blank or is not verified
 		parent::merge($params);
 	}

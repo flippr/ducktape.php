@@ -5,6 +5,7 @@ class DTStoreTest extends DTTestCase{
 	protected $store;
 	
 	public function setup(){
+		parent::setup();
 		$this->store = new DTYAMLStore("file://".dirname(__FILE__)."/yaml_db"); //instantiate a concrete class for tests
 	}
 	

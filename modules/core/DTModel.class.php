@@ -144,7 +144,7 @@ class DTModel implements arrayaccess {
 	public function merge(array $params){
 		$updated = 0;
 		foreach($params as $k=>$v){
-			if($k!="id" && $this[$k]!=$v){
+			if($k!="id" && (!isset($this[$k]) || $this[$k]!=$v)){
 				$this[$k] = $v;
 				$updated++;
 			}
