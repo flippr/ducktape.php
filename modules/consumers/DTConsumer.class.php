@@ -39,7 +39,7 @@ class DTConsumer{
 	}
 	
 	public function formatResponse($params,$response){
-		$response = isset($params["callback"])?trim(preg_replace("/^".$params["callback"]."\(\s*(.*?)\s*\)$/","\\1",$response)):$response;
+		$response = isset($params["callback"])?trim(preg_replace("/".$params["callback"]."\(\s*(.*?)\s*\)$/","\\1",$response)):$response;
 		$fmt = isset($params["fmt"])?$params["fmt"]:null;
 		if(!isset($fmt) && isset($params["format"]))
 			$fmt = $params["format"];
