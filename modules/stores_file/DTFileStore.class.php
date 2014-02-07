@@ -27,9 +27,9 @@ abstract class DTFileStore extends DTStore {
 	/** parses a string in storage format into an array of key-value rows
 		@return returns the object or null on failure
 	*/
-	abstract public static function unserialize($str);
+	public static function unserialize($str){}
 	/** produce a string in storage format from key-value rows */
-	abstract public static function serialize($obj);
+	public static function serialize($obj){}
 	
 	public function columnsForTable($table){
 		return array_keys($this->tables[$table][0]);

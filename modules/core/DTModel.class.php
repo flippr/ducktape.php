@@ -204,6 +204,10 @@ class DTModel implements arrayaccess {
 		return $qb->from(static::$storage_table." ".get_called_class())->update($params);
 	}
 	
+	public static function deleteRows(DTQueryBuilder $qb){
+		return $qb->from(static::$storage_table)->delete();
+	}
+	
 	public static function byID($db,$id,$cols="*"){
 		if(!($db instanceof DTStore))
 			throw new Exception("invalid storage for id ('{$id}')");

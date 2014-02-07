@@ -28,8 +28,8 @@ class DTAuthenticationProvider extends DTProvider{
 ///@{
 	/**
 		authenticate an active user
-		@param user - the username
-		@param pass - the password
+		@param alias - the username
+		@param password - the password
 		@return returns a valid user object and sets the session variable +pvd_user_id+, or null if authentication fails
 	*/
 	public function actionAuthenticate(){
