@@ -11,7 +11,7 @@ class DTLog{
 	public static $debug_fp = null;
 	
 	/** emit major failure message */
-	public function error($msg){
+	public static function error($msg){
 		if(!isset(DTLog::$error_fp)){
 			$error_log = dirname(__FILE__)."/../../".DTSettings::$config["logs"]["path"].DTSettings::$config["logs"]["error_log"];
 			if(!file_exists($error_log)){
@@ -24,12 +24,12 @@ class DTLog{
 	}
 	
 	/** currently an alias for info **/
-	public function warn($msg,$bt_offset=1){
+	public static function warn($msg,$bt_offset=1){
 		DTLog::info($msg,$bt_offset);
 	}
 	
 	/** emit warnings/information */
-	public function info($msg,$bt_offset=1){
+	public static function info($msg,$bt_offset=1){
 		if(!isset(DTLog::$info_fp)){
 			$info_log = dirname(__FILE__)."/../../".DTSettings::$config["logs"]["path"].DTSettings::$config["logs"]["info_log"];
 			if(!file_exists($info_log)){

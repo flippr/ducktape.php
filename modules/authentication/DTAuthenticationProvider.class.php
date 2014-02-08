@@ -89,7 +89,10 @@ class DTAuthenticationProvider extends DTProvider{
 	
 	public function actionCurrentUser(){
 		$uid = $this->currentUserID();
-		return new DTUser($this->db->where("id='{$uid}'"));
+		try{
+			return new DTUser($this->db->where("id='{$uid}'"));
+		}catch(Exception $e){}
+		return null;
 	}
 }
 ///@}
