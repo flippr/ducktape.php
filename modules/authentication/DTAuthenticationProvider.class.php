@@ -84,7 +84,12 @@ class DTAuthenticationProvider extends DTProvider{
 	}
 	
 	public function currentUserID(){
-			return $this->session["pvd_user_id"];
+		return $this->session["pvd_user_id"];
+	}
+	
+	public function actionCurrentUser(){
+		$uid = $this->currentUserID();
+		return new DTUser($this->db->where("id='{$uid}'"));
 	}
 }
 ///@}

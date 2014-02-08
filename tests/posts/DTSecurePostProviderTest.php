@@ -1,7 +1,7 @@
 <?php
 dt_load_module("tests","posts");
 
-class DTPostProviderTest extends DTTestCase{
+class DTSecurePostProviderTest extends DTTestCase{
 	protected $provider;
 	
 	public function initSQL($sql=""){
@@ -26,7 +26,7 @@ END;
 	
 	public function setup(){
 		parent::setup();
-		$this->provider = new DTPostProvider();
+		$this->provider = new DTSecurePostProvider();
 	}
 	
 	public function testAddPost(){
