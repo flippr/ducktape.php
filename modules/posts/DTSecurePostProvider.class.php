@@ -11,4 +11,8 @@ class DTSecurePostProvider extends DTPostProvider{
 		$ids = $this->params->arrayParam("ids");
 		DTPost::deleteRows($this->db->where("id IN (".implode(",",$ids).")"));
 	}
+	
+	public function actionListAuthors(){
+		return $this->db->select("SELECT id,CONCAT(first_name,' ',last_name) as name FROM users WHERE is_active=1");
+	}
 }

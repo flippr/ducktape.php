@@ -197,6 +197,19 @@ abstract class DTStore{
 		return $timestamp - (int)substr(date('O'),0,3)*60*60;
 	}
 	
+	public static function time($timestamp=null){
+		$timestamp = isset($timestamp)?$timestamp:time();
+		return date("H:i:s",$timestamp);
+	}
+	
+	public static function localizedDate($date_str){
+		return strftime("%x",$date_str);
+	}
+	
+	public static function localizedTime($time_str){
+		return strftime("%r",$time_str);
+	}
+	
 	function __destruct() {
       $this->disconnect();
    }

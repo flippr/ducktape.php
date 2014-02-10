@@ -18,7 +18,7 @@ class DTMySQLDatabase extends DTDatabase{
 	}
 	
 	public function select($query){
-		$result = $this->conn->query($query) or die(mysql_error());
+		$result = $this->conn->query($query);
 		if(!$result)
 			DTLog::error("Query failed: ".$this->conn->error."\n".$query);
 		$rows = array();
