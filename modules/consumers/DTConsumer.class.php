@@ -6,6 +6,7 @@ class DTConsumer{
 	protected $url;
 	protected $sync_token; // if this is set, we are accessing synchronously
 	protected $action_format;
+	protected $err;
 	
 	function __construct($api_name,$path="",$token=null){
 		$this->api = DTAPI::fromAPI($api_name);
@@ -48,6 +49,7 @@ class DTConsumer{
 				return json_decode($response,true);
 			default:
 				$response = json_decode($response,true);
+				$this->err = isset($response)?$response["err"]:0; //carry the response code from the provider
 				return isset($response)?$response["obj"]:"";
 		}
 	}
@@ -56,6 +58,7 @@ class DTConsumer{
 	public function requestAndRespond(array $params, $method='POST'){
 		$action = isset($params["act"])?$params["act"]:null; //these can be (correctly) omitted, for example during authentication at oauth_verifier
 		$response = new DTResponse($this->request($action,$params,$method));
+		$response->error($this->err);
 		$response->respond($params);
 		return $response;
 	}

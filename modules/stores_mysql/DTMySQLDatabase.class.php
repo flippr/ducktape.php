@@ -40,7 +40,7 @@ class DTMySQLDatabase extends DTDatabase{
 	public function query($query){
 		$result = $this->conn->query($query);
 		if(!$result)
-			DTLog::error("Query failed: ".$this->conn->error."\n".$query);
+			throw new Exception("Query failed: ".$this->conn->error."\n".$query);
 	}
 	
 	public function insert($query){

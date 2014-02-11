@@ -166,12 +166,13 @@ class DTModel implements arrayaccess {
 	
 	/**
 		convenience method for basic updates based on storageProperties()
-		@note uses the object's id property for where-clause
+		@note uses the object's id property for where-clause, unless query-builder is passed
 	*/
-	public function update(DTDatabase $db=null){
+	public function update(DTDatabase $db=null,$qb=null){
 		$db = (isset($db)?$db:$this->db);
+		$qb = isset($qb)?$qb:$db->where("id='{$this->id}'");
 		$properties = $this->storageProperties($db,array(),"update");
-		return $db->where("id='{$this->id}'")->from(static::$storage_table)->update($properties);
+		return $qb->from(static::$storage_table)->update($properties);
 	}
 	
 	/** convenience method for updating or inserting a record (as necessary)
@@ -183,9 +184,9 @@ class DTModel implements arrayaccess {
 	public static function upsert(DTQueryBuilder $qb,array $params,array $defaults=array()){
 		try{
 			$obj = new static($qb);
-			$obj->setStore($qb->db);
+			$obj->setStore($qb->db); //must come before merge for cleaning
 			$obj->merge($params);
-			$obj->update();
+			$obj->update($qb->db,$qb);
 			return $obj;
 		}catch(Exception $e){ //the record doesn't exist, insert it instead
 			$obj = new static($defaults);
