@@ -7,19 +7,21 @@ class DTAPI extends DTModel{
 	
 	protected $consumer_key;
 	protected $secret;
+	protected $settings;
 	
 	public static function fromAPI($api_name){
 		$api = array();
 		$settings = DTSettings::api();
 		$api["name"] = $api_name;
-		if(!isset($settings[$api_name],$settings[$api_name]["url"],$settings[$api_name]["key"],$settings[$api_name]["secret"]))
-			throw new Exception("Bad API entry: missing url, key, or secret");
+		if(!isset($settings[$api_name],$settings[$api_name]["url"],$settings[$api_name]["key"]))
+			throw new Exception("Bad API entry: missing url, or key");
 		$api_url = $settings[$api_name]["url"];
 		if(substr($api_url,-1)!="/") $api_url .= "/";
 		$api["url"] = $api_url;
 		$api["consumer_key"] = $settings[$api_name]["key"];
-		$api["secret"] = $settings[$api_name]["secret"];
-		return new DtAPI($api);
+		$api["secret"] = isset($settings[$api_name]["secret"])?$settings[$api_name]["secret"]:"";
+		$api["settings"] = $settings[$api_name];
+		return new DTAPI($api);
 	}
 
 	/**
