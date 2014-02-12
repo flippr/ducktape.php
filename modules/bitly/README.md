@@ -9,8 +9,7 @@ Currently Using Bit.ly
 Add the following to your /basedir/local/config.yml
 
 ```
-linkshortener:
-  api: 'bitly'
+bitly:
   username: 'username'
   clientapikey: 'apikey'
 ```

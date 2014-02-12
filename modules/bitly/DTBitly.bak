@@ -2,11 +2,11 @@
 require_once(dirname(__FILE__)."/../../ducktape.inc.php");
 
 /**
-	DTLinkShortener
+	DTBitly
 	Controls simple shortening of URLs through the BitLy API
 */
 
-class DTLinkShortener{
+class DTBitly extends DTConsumer{
 	private static $apiUrl = "https://api-ssl.bit.ly/v3/";
 	private static $format = "json";
 	private static $useAppKey = false;
@@ -16,13 +16,20 @@ class DTLinkShortener{
 	private static $oauthsecret = null;
 	private static $accessToken = null;
 
+	protected $user;
+
+	function __construct($api_name,$path=""){
+		parent::__construct($api_name,$provider_url);
+		$this->user = $this->api['user'];
+	}
+
 	private static function init( $withAppKey ){
 		if ($withAppKey){
-			DTLinkShortener::$useAppKey = true;
+			DTBitly::$useAppKey = true;
 			$username   = DTSettings::$config["linkshortener"]["username"];
 			$userapikey = DTSettings::$config["linkshortener"]["clientapikey"];
-			DTLinkShortener::$user   = $username;
-			DTLinkShortener::$apikey = $userapikey;
+			DTBitly::$user   = $username;
+			DTBitly::$apikey = $userapikey;
 		} else {
 /**
 			$this->id     = DTSettings::$config["linkshortener"]["clientid"];
@@ -33,10 +40,10 @@ class DTLinkShortener{
 	}
 
 	public static function shortenUrl( $url, $withAppKey = true ){
-		DTLinkShortener::init($withAppKey);
+		DTBitly::init($withAppKey);
 		$request = "shorten?";
 		$request .= "uri=".urlencode($url);
-		$response = DTLinkShortener::callApi( $request );
+		$response = DTBitly::callApi( $request );
 
 		// Validate the response
 		if( $response['status_code'] == 200 ){
@@ -50,7 +57,7 @@ class DTLinkShortener{
 	public static function expandUrl( $url ){
 		$request = "expand?";
 		$request .= "shortUrl=".urlencode($url);
-		$response = DTLinkShortener::callApi( $request );
+		$response = DTBitly::callApi( $request );
 
 		// Validate the response
 		if( $response['status_code'] == 200 ){
@@ -67,15 +74,15 @@ class DTLinkShortener{
 	}
 
 	private static function callApi( $urlCall, $params = null ){
-		if( DTLinkShortener::$useAppKey ){
+		if( DTBitly::$useAppKey ){
 			// Because the flag for use AppKey is true,
 			// we inject the needed login and apikey rather
 			// than the access token.
-			$urlCall .= "&login=".DTLinkShortener::$user;
-			$urlCall .= "&apiKey=".DTLinkShortener::$apikey;
-			$urlCall .= "&format=".DTLinkShortener::$format;
+			$urlCall .= "&login=".DTBitly::$user;
+			$urlCall .= "&apiKey=".DTBitly::$apikey;
+			$urlCall .= "&format=".DTBitly::$format;
 		}
-		$fullUrl = DTLinkShortener::$apiUrl.$urlCall;
+		$fullUrl = DTBitly::$apiUrl.$urlCall;
 		//echo "\n---\n";
 		//echo "Called {$fullUrl}";
 		//echo "\n---\n";
