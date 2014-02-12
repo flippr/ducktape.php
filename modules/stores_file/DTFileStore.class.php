@@ -27,9 +27,9 @@ abstract class DTFileStore extends DTStore {
 	/** parses a string in storage format into an array of key-value rows
 		@return returns the object or null on failure
 	*/
-	abstract public static function unserialize($str);
+	public static function unserialize($str){}
 	/** produce a string in storage format from key-value rows */
-	abstract public static function serialize($obj);
+	public static function serialize($obj){}
 	
 	public function columnsForTable($table){
 		return array_keys($this->tables[$table][0]);
@@ -109,12 +109,13 @@ abstract class DTFileStore extends DTStore {
 			$info = pathinfo($f);
 			$table = $info["filename"];
 			$this->_filenames[$table]=$f;
-			$obj = $this->unserialize(file_get_contents("{$f}"));
+			$contents = file_get_contents("{$f}");
+			$obj = $this->unserialize($contents);
 			if(isset($obj))
 				$this->tables[$table] = array_map(function($k,$v){
 						return array_merge(array("id"=>$k),$v);
 					}, array_keys($obj),array_values($obj));
-			else
+			else if(!empty($contents))
 				throw new Exception("Failed to load table from file: {$f}");
 		}
 	}

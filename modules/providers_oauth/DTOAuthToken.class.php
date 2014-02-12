@@ -5,8 +5,8 @@ class DTOAuthToken extends DTModel{
 	protected $_strict_properties = true;
 	public static $storage_table = "tokens";
 
-	protected $type = 0;
-	protected $status = 0;
+	public $type = 0;
+	public $status = 0;
 	public $token;
 	protected $secret;
 	protected $consumer_id;

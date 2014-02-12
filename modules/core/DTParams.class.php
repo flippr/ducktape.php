@@ -31,7 +31,19 @@ class DTParams{
 	}
 	
 	public function boolParam($name,$default=null){
-		return static::parseBool($this->param($name,$default=null));
+		return static::parseBool($this->param($name,$default));
+	}
+	
+	public function dateParam($name,$default=null){
+		return $this->db->date(strtotime($this->param($name,$default)));
+	}
+	
+	public function timeParam($name,$default=null){
+		return $this->db->time(strtotime($this->param($name,$default)));
+	}
+	
+	public function checkboxParam($name){
+		return isset($this->params[$name])?1:0;
 	}
 	
 	public function arrayParam($name,$default=null){

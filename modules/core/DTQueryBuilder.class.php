@@ -90,6 +90,15 @@ class DTQueryBuilder{
 		return false;
 	}
 	
+	public function delete(){
+		try{
+			$stmt = "DELETE FROM {$this->from_clause} WHERE {$this->where_clause}";
+			$this->db->query($stmt);
+			return true;
+		}catch(Exception $e){}
+		return false;
+	}
+	
 	public static function formatValue($v){
 		if(!isset($v)||$v==="NULL")
 			return "NULL";

@@ -16,7 +16,7 @@ END;
 }
 
 	public function testConstructor(){
-		$user = new DTUser(array("alias"=>"testuser","password"=>"testpass"));
+		$user = new DTUser(array("alias"=>"testuser","password"=>DTUser::encryptPassword("testpass")));
 		$this->assertEquals($user["alias"],"testuser");
 		$this->assertTrue($user->verifyPassword("testpass"));
 	}
@@ -58,7 +58,7 @@ END;
 	}
 	
 	public function testVerifyPassword(){
-		$user = new DTUser(array("password"=>"test string"));
+		$user = new DTUser(array("password"=>DTUser::encryptPassword("test string")));
 		$this->assertTrue($user->verifyPassword("test string",5));
 		$this->assertFalse($user->verifyPassword("test string 2",5));
 	}

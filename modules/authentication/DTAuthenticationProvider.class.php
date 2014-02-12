@@ -28,8 +28,8 @@ class DTAuthenticationProvider extends DTProvider{
 ///@{
 	/**
 		authenticate an active user
-		@param user - the username
-		@param pass - the password
+		@param alias - the username
+		@param password - the password
 		@return returns a valid user object and sets the session variable +pvd_user_id+, or null if authentication fails
 	*/
 	public function actionAuthenticate(){
@@ -84,7 +84,15 @@ class DTAuthenticationProvider extends DTProvider{
 	}
 	
 	public function currentUserID(){
-			return $this->session["pvd_user_id"];
+		return $this->session["pvd_user_id"];
+	}
+	
+	public function actionCurrentUser(){
+		$uid = $this->currentUserID();
+		try{
+			return new DTUser($this->db->where("id='{$uid}'"));
+		}catch(Exception $e){}
+		return null;
 	}
 }
 ///@}
