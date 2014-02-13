@@ -8,11 +8,16 @@ class DTConsumer{
 	protected $action_format;
 	protected $err;
 	
-	function __construct($api_name,$path="",$token=null){
-		$this->api = DTAPI::fromAPI($api_name);
-		$this->url = $this->api["url"].$path;
+	function __construct($api_name=null,$path="",$token=null){
+		if(!empty($api_name)) //load the api from storage
+			$this->loadAPI(DTAPI::fromAPI($api_name),$path);
 		$this->sync_token = $token;
-		$this->action_format = isset($this->api["action"])?$this->api["action"]:"act";
+	}
+	
+	function loadAPI(DTAPI $api,$path=""){
+		$this->api = $api;
+		$this->url = $this->api["url"].$path;
+		$this->action_format = isset($this->api["settings"]["action"])?$this->api["settings"]["action"]:"act";
 	}
 
 	/** primary method of making a request to a DTSecureProvider */
