@@ -22,7 +22,7 @@ class DTSQLiteDatabase extends DTDatabase{
 		try{
 			$this->conn->exec($query);
 		}catch(Exception $e){
-			DTLog::error("SQLite error! ".$this->conn->lastErrorMsg()."\n".$query);
+			throw new Exception($this->conn->lastErrorMsg());
 		}
 	}
 	

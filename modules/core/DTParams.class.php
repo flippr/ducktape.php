@@ -8,7 +8,7 @@ class DTParams{
 
 	function __construct(array $params=null,$db=null){
 		$this->params = isset($params)?$params:$_REQUEST;
-		$this->db = $db;
+		$this->db = isset($db)?$db:DTSettings::$default_database;
 	}
 	
 //======================
@@ -47,28 +47,24 @@ class DTParams{
 	}
 	
 	public function arrayParam($name,$default=null){
-		$arr = $this->param($name,$default);
-		if(!is_array($arr)){ //if this isn't array, assume it is json encoded or single value
-			$arr = json_decode($arr);
-			if(!is_array($arr)) //must have been a single value
-				$arr = array($arr);
-		}
-		if(isset($this->db))
-			foreach($arr as $k=>$v) //clean all the array params
-				$arr[$k] = $this->db->clean($v);
-		return $arr;
+		return static::parseArray($this->param($name,$default),$this->db);
 	}
 	
 	/** @return returns a string param, cleaning it if +db+ is valid */
 	public function stringParam($name,$default=null){
-		return isset($this->db)?$this->db->clean($this->param($name,$default)):$this->param($name,$default);
+		return static::parseString($this->param($name,$default),$this->db);
 	}
 	
 	/** @return returns all parameters, using db cleaning */
 	public function allParams(array $defaults=array()){
 		$params = $defaults;
 		foreach($this->params as $k=>$v){
-			$params[$k] = $this->db->clean($v);
+			if(is_null($v))
+				$params[$k] = null;
+			else if(is_array($v))
+				$params[$k] = static::parseArray($v,$this->db);
+			else
+				$params[$k] = static::parseString($v,$this->db);				
 		}
 		return $params;
 	}
@@ -96,4 +92,22 @@ class DTParams{
 		return null;
 	}
 
+	public static function parseArray($val,$db){
+		$arr = $val;
+		if(!is_array($arr)){ //if this isn't array, assume it is json encoded or single value
+			$arr = json_decode($arr);
+			if(!is_array($arr)) //must have been a single value
+				$arr = array($arr);
+		}
+		foreach($arr as $k=>$v) //clean all the array params
+			if(is_array($v))
+				$arr[$k] = static::parseArray($v,$db); //recursively parse inner arrays
+			else
+				$arr[$k] = static::parseString($v,$db);
+		return $arr;
+	}
+	
+	public static function parseString($val,$db){
+		return isset($db)?$db->clean($val):$val;
+	}
 }

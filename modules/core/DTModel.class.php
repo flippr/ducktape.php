@@ -8,6 +8,7 @@ class DTModel implements arrayaccess {
 	/** require properties to be defined in the class, defaults to false */
 	protected static $strict_properties = false;
 	protected static $storage_table = null;
+	protected static $primary_key_column = "id";
 	
 	protected $db=null;
 	
@@ -132,7 +133,7 @@ class DTModel implements arrayaccess {
 		if(count($cols)==0)
 			DTLog::error("Found 0 columns for table (".static::$storage_table.")");
 		foreach($cols as $k){
-			if($purpose!="insert"||$k!="id") //don't try to insert the id, assume it's autoincrementing
+			if($purpose!="insert"||$k!=static::$primary_key_column) //don't try to insert the id, assume it's autoincrementing
 				$storage_params[$k] = $this[$k];
 		}
 		return array_merge($defaults,$storage_params);
@@ -170,7 +171,7 @@ class DTModel implements arrayaccess {
 	*/
 	public function update(DTDatabase $db=null,$qb=null){
 		$db = (isset($db)?$db:$this->db);
-		$qb = isset($qb)?$qb:$db->where("id='{$this->id}'");
+		$qb = isset($qb)?$qb:$db->where(static::$primary_key_column."='".$this[static::$primary_key_column]."'");
 		$properties = $this->storageProperties($db,array(),"update");
 		return $qb->from(static::$storage_table)->update($properties);
 	}
@@ -184,16 +185,22 @@ class DTModel implements arrayaccess {
 	public static function upsert(DTQueryBuilder $qb,array $params,array $defaults=array()){
 		try{
 			$obj = new static($qb);
-			$obj->setStore($qb->db); //must come before merge for cleaning
-			$obj->merge($params);
-			$obj->update($qb->db,$qb);
+			//$obj->setStore($qb->db); //must come before merge for cleaning
+			$p = new DTParams($obj->storageProperties($qb->db,array(),"reinsertion"));
+			$clean = $p->allParams();
+			$obj->merge($clean); //replace storage with clean varieties
+			$obj->merge($params); // now we're ready to merge in the new stuff
+			$obj->update($qb->db); //it's essential that this use the +primary_key_column+
 			return $obj;
-		}catch(Exception $e){ //the record doesn't exist, insert it instead
-			$obj = new static($defaults);
-			$obj->setStore($qb->db);
-			$obj->merge($params);
-			$obj->insert();
-			return $obj;
+		}catch(Exception $e){
+			if($e->getCode()==1){ //the record doesn't exist, insert it instead
+				$obj = new static($defaults);
+				$obj->setStore($qb->db);
+				$obj->merge($params);
+				$obj->insert();
+				return $obj;
+			}else
+				throw $e;
 		}
 	}
 	

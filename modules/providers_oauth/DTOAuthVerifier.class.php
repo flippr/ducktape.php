@@ -69,12 +69,12 @@ class DTOAuthVerifier implements DTVerifier {
 	// checks the consumer key
 	public function lookupConsumer($provider) {
 		try{
-			$api = new DTAPI($this->db->where("consumer_key='{$provider->consumer_key}'"));
+			$api = new DTAPI($this->db->select1("SELECT * FROM consumers WHERE consumer_key='{$provider->consumer_key}'"));
 			if($api["status"]==0) return OAUTH_CONSUMER_KEY_REFUSED;
 		    $this->consumer_id = $api["id"];
 		    $provider->consumer_secret = $api["secret"];
 		    return OAUTH_OK;
-		}catch(Exception $e){}
+		}catch(Exception $e){DTLog::debug($e->getMessage());}
 	    return OAUTH_CONSUMER_KEY_UNKNOWN;
 	}
 	

@@ -133,11 +133,13 @@ abstract class DTStore{
 	public function selectKV($stmt){
 		$list = array();
 		$rows = $this->select($stmt);
-		$cols = array_keys($rows[0]);
-		$key_col = $cols[0];
-		$val_col = $cols[1];
-		foreach($rows as $r){ //pair keys and values
-			$list[$r[$key_col]] = $r[$val_col];
+		if(count($rows)>0){
+			$cols = array_keys($rows[0]);
+			$key_col = $cols[0];
+			$val_col = $cols[1];
+			foreach($rows as $r){ //pair keys and values
+				$list[$r[$key_col]] = $r[$val_col];
+			}
 		}
 		return $list;
 	}
