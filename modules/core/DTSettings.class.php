@@ -60,6 +60,22 @@ class DTSettings{
 	    $suffix
 	  );
 	}
+
+	public static function baseDir($suffix=''){
+          if( isset(DTSettings::$config['base_dir']) ){
+            $base = DTSettings::$config['base_dir'];
+          }
+          if( is_dir($base)){ return "{$base}/{$suffix}"; }
+	  return $suffix;
+	}
+
+	public static function baseSiteDir($suffix=''){
+	  if( isset(DTSettings::$config['base_dir']) ){
+	    $base = DTSettings::$config['base_dir']."/site";
+	  }
+	  if( is_dir($base)){ return "{$base}/{$suffix}"; }
+	  return $suffix;
+	}
 }
 
 DTSettings::config();

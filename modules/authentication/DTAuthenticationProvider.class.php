@@ -42,7 +42,9 @@ class DTAuthenticationProvider extends DTProvider{
 				$session["pvd_user_id"] = $u["id"];
 				return $u;
 			}
-		}catch(Exception $e){}
+		}catch(Exception $e){
+			DTLog::debug("User Login Failed: {$e}");
+		}
 		unset($session["pvd_user_id"]);
 		return null;
 	}

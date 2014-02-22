@@ -6,3 +6,4 @@ require_once dirname(__FILE__)."/DTParams.class.php";
 require_once dirname(__FILE__)."/DTModel.class.php";
 require_once dirname(__FILE__)."/DTSession.class.php";
 require_once dirname(__FILE__)."/DTResponse.class.php";
+require_once dirname(__FILE__)."/DTHtmlMenu.class.php";

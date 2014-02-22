@@ -9,6 +9,7 @@ class DTOAuthVerifier implements DTVerifier {
 	
 	function __construct($auth_url=null,$db=null){
 		$this->db = isset($db)?$db:DTSettings::$default_database;
+		$auth_url = isset(DTSettings::$config['auth_url'])?DTSettings::$config['auth_url']:null;
 		$this->auth_url = isset($auth_url)?$auth_url:"login.php";
 	}
 
